@@ -10,7 +10,8 @@ export default defineConfig({
   },
   datasource: {
     url: process.env["DATABASE_URL"],
-    // DIRECT_URL bypasses the pgbouncer session pooler for migrate commands
-    directUrl: process.env["DIRECT_URL"],
-  },
+    // DIRECT_URL bypasses the pgbouncer session pooler for migrate commands.
+    // Cast required: Prisma v7 types don't expose directUrl but it is valid at runtime.
+    ...(process.env["DIRECT_URL"] ? { directUrl: process.env["DIRECT_URL"] } : {}),
+  } as { url?: string; directUrl?: string },
 });
