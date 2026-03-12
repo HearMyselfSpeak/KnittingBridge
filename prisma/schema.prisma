@@ -1,0 +1,411 @@
+// KnittingBridge — Complete Prisma Schema
+// All AI model IDs are read from ENV — never hardcoded here.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ──────────────────────────────────────────────────────────────────
+
+enum Role {
+  MAKER
+  GUIDE
+  ADMIN
+}
+
+enum GuideStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  SUSPENDED
+}
+
+enum RequestStatus {
+  SUBMITTED
+  TRIAGING
+  AI_RESOLVED
+  MATCHED
+  IN_SESSION
+  COMPLETED
+  CANCELLED
+  DISPUTED
+}
+
+enum SessionType {
+  ASYNC
+  LIVE
+}
+
+enum SessionStatus {
+  PENDING_PAYMENT
+  QUEUED
+  NOTIFYING_GUIDES
+  GUIDE_ACCEPTED
+  WAITING_ROOM
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  DISPUTED
+  REFUNDED
+}
+
+enum NotificationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+enum ColorSessionStatus {
+  AWAITING_GARMENT_UPLOAD
+  ANALYZING_GARMENT
+  AWAITING_COLOR_DIRECTION
+  AWAITING_MORE_YARN_INFO
+  AWAITING_REGION_MAPPING
+  READY_FOR_PREVIEW
+  GENERATING_PREVIEW
+  PREVIEW_READY
+  CORRECTION_REQUESTED
+  FAILED
+}
+
+enum AssetKind {
+  GARMENT_SCREENSHOT
+  GARMENT_CLOSEUP
+  YARN_PHOTO
+}
+
+enum PaletteSource {
+  DESCRIBED
+  YARN_PHOTO
+  THEME
+  AUTO_FILLED
+}
+
+// ─── NextAuth Models ─────────────────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Core Platform Models ────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  role          Role      @default(MAKER)
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts             Account[]
+  sessions             Session[]
+  requests             Request[]
+  guideProfile         GuideProfile?
+  guideSessions        GuideSession[]
+  makerSessions        MakerSession[]
+  colorPreviewSessions ColorPreviewSession[]
+}
+
+model GuideProfile {
+  id     String      @id @default(cuid())
+  userId String      @unique
+  status GuideStatus @default(PENDING)
+
+  // Skill areas
+  garments   Boolean @default(false)
+  fitSizing  Boolean @default(false)
+  socks      Boolean @default(false)
+  lace       Boolean @default(false)
+  colorwork  Boolean @default(false)
+  cables     Boolean @default(false)
+  patternMod Boolean @default(false)
+  yarnSub    Boolean @default(false)
+  repair     Boolean @default(false)
+  machine    Boolean @default(false)
+
+  // Temperament scores (1.0–5.0)
+  directnessScore Float @default(3.0)
+  technicality    Float @default(3.0)
+  verbosity       Float @default(3.0)
+  empathy         Float @default(3.0)
+  patience        Float @default(3.0)
+  encouragement   Float @default(3.0)
+
+  // Teaching style
+  questionBased   Boolean @default(false)
+  processOriented Boolean @default(false)
+  fixVsTeach      Float   @default(0.5)
+  asyncOnly       Boolean @default(false)
+  weeklyHours     Int?
+
+  // Stripe Connect
+  stripeAccountId String?
+  stripeOnboarded Boolean @default(false)
+
+  // Availability
+  isOnline        Boolean   @default(false)
+  lastActiveAt    DateTime?
+  currentCapacity Int       @default(3)
+  activeSessions  Int       @default(0)
+
+  // Quality metrics
+  totalSessions   Int   @default(0)
+  avgRating       Float @default(0.0)
+  totalEarnings   Int   @default(0)
+  avgResponseTime Int   @default(0)
+
+  // Application data
+  sampleUrls        String[]
+  scenarioResponses Json?
+  yearsExperience   Int?
+  location          String?
+  timezone          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  helpSessions  HelpSession[]
+  notifications GuideNotification[]
+  guideSessions GuideSession[]
+}
+
+model Request {
+  id     String        @id @default(cuid())
+  userId String
+  status RequestStatus @default(SUBMITTED)
+
+  title       String
+  description String   @db.Text
+  imageUrls   String[]
+  patternUrl  String?
+
+  // AI triage output
+  issueType      String?
+  skillsRequired String[]
+  urgency        String?
+  aiGuidance     String?  @db.Text
+
+  // Maker state (from AI triage)
+  frustrationScore   Int?
+  confidenceScore    Int?
+  prefersDirectness  Boolean?
+  wantsEducation     Boolean?
+  needsEncouragement Boolean?
+
+  matchedGuideId String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user          User                @relation(fields: [userId], references: [id])
+  helpSession   HelpSession?
+  notifications GuideNotification[]
+}
+
+model HelpSession {
+  id             String        @id @default(cuid())
+  requestId      String        @unique
+  guideProfileId String
+
+  type   SessionType
+  status SessionStatus @default(PENDING_PAYMENT)
+
+  // Video (Daily.co)
+  videoRoomUrl   String?
+  videoRoomName  String?
+  videoStartedAt DateTime?
+  videoEndedAt   DateTime?
+  recordingUrl   String?
+
+  // Payment
+  amount                Int      @default(0)
+  platformFee           Int      @default(0)
+  guideEarnings         Int      @default(0)
+  stripePaymentIntentId String?
+  stripeTransferId      String?
+  paid                  Boolean  @default(false)
+  paidAt                DateTime?
+
+  startedAt   DateTime?
+  completedAt DateTime?
+  duration    Int?
+  transcript  Json?
+  summary     String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  request      Request      @relation(fields: [requestId], references: [id])
+  guideProfile GuideProfile @relation(fields: [guideProfileId], references: [id])
+  messages     Message[]
+  makerSession MakerSession?
+  guideSession GuideSession?
+}
+
+model GuideNotification {
+  id             String             @id @default(cuid())
+  guideProfileId String
+  requestId      String
+  status         NotificationStatus @default(PENDING)
+  sentAt         DateTime           @default(now())
+  respondedAt    DateTime?
+
+  guideProfile GuideProfile @relation(fields: [guideProfileId], references: [id])
+  request      Request      @relation(fields: [requestId], references: [id])
+}
+
+model Message {
+  id        String    @id @default(cuid())
+  sessionId String
+  senderId  String
+  content   String    @db.Text
+  imageUrl  String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  session HelpSession @relation(fields: [sessionId], references: [id])
+}
+
+model MakerSession {
+  id        String  @id @default(cuid())
+  sessionId String  @unique
+  userId    String
+  rating    Int?
+  feedback  String? @db.Text
+
+  session HelpSession @relation(fields: [sessionId], references: [id])
+  user    User        @relation(fields: [userId], references: [id])
+}
+
+model GuideSession {
+  id             String  @id @default(cuid())
+  sessionId      String  @unique
+  guideProfileId String
+  userId         String
+  notes          String? @db.Text
+  privateNotes   String? @db.Text
+
+  session      HelpSession  @relation(fields: [sessionId], references: [id])
+  guideProfile GuideProfile @relation(fields: [guideProfileId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  stripePaymentId String   @unique
+  amount          Int
+  currency        String   @default("usd")
+  status          String
+  metadata        Json?
+  createdAt       DateTime @default(now())
+}
+
+// ─── Color Preview Tool Models ───────────────────────────────────────────────
+
+model ColorPreviewSession {
+  id        String             @id @default(cuid())
+  userId    String?
+  status    ColorSessionStatus @default(AWAITING_GARMENT_UPLOAD)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  user               User?               @relation(fields: [userId], references: [id])
+  uploadedAssets     UploadedAsset[]
+  garmentAnalysis    GarmentAnalysis?
+  paletteAssignments PaletteAssignment[]
+  previews           ColorPreview[]
+}
+
+model UploadedAsset {
+  id             String    @id @default(cuid())
+  colorSessionId String
+  kind           AssetKind
+  mimeType       String
+  width          Int?
+  height         Int?
+  storageKey     String
+  fileSize       Int
+  createdAt      DateTime  @default(now())
+
+  colorSession       ColorPreviewSession @relation(fields: [colorSessionId], references: [id], onDelete: Cascade)
+  paletteAssignments PaletteAssignment[]
+}
+
+model GarmentAnalysis {
+  id              String   @id @default(cuid())
+  colorSessionId  String   @unique
+  rawAnalysisJson Json
+  regions         Json
+  detectedColors  Json
+  linkedRegions   Json
+  confidence      Float
+  analyzedAt      DateTime @default(now())
+
+  colorSession ColorPreviewSession @relation(fields: [colorSessionId], references: [id], onDelete: Cascade)
+}
+
+model PaletteAssignment {
+  id                     String        @id @default(cuid())
+  colorSessionId         String
+  regionId               String
+  regionLabel            String
+  targetColorDescription String
+  source                 PaletteSource
+  sourceAssetId          String?
+  createdAt              DateTime      @default(now())
+
+  colorSession ColorPreviewSession @relation(fields: [colorSessionId], references: [id], onDelete: Cascade)
+  sourceAsset  UploadedAsset?      @relation(fields: [sourceAssetId], references: [id])
+}
+
+model ColorPreview {
+  id             String   @id @default(cuid())
+  colorSessionId String
+  prompt         String   @db.Text
+  imageUrl       String
+  modelUsed      String
+  generatedAt    DateTime @default(now())
+  refinementOf   String?
+
+  colorSession ColorPreviewSession @relation(fields: [colorSessionId], references: [id], onDelete: Cascade)
+}
