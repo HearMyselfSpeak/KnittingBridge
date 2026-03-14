@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Lora, Inter } from "next/font/google";
 import "./globals.css";
+import { Providers } from "./providers";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
 
-// Serif for headlines (craft + precision); sans for body
 const lora = Lora({
   variable: "--font-serif",
   subsets: ["latin"],
@@ -29,7 +31,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${lora.variable} ${inter.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased flex flex-col min-h-screen">
+        <Providers>
+          <Navigation />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </Providers>
+      </body>
     </html>
   );
 }

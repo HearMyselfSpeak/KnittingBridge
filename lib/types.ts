@@ -57,6 +57,48 @@ export interface YarnAnalysisResult {
   notes: string;
 }
 
+// ─── Color Preview Tool — client-facing view types ───────────────────────────
+
+export interface UploadedAssetView {
+  id: string;
+  kind: "GARMENT_SCREENSHOT" | "GARMENT_CLOSEUP" | "YARN_PHOTO";
+  fileName: string;
+  publicUrl: string;
+  mimeType: string;
+}
+
+export interface PaletteAssignmentInput {
+  regionId: string;
+  regionLabel: string;
+  targetColorDescription: string;
+  source: "DESCRIBED" | "YARN_PHOTO" | "THEME" | "AUTO_FILLED";
+  sourceAssetId?: string;
+}
+
+export interface ColorPreviewView {
+  id: string;
+  imageUrl: string;
+  refinementOf?: string | null;
+  generatedAt: string;
+}
+
+export interface ColorPreviewSessionView {
+  id: string;
+  status: ColorSessionStatus;
+  uploadedAssets: UploadedAssetView[];
+  analysis: GarmentAnalysisResult | null;
+  assignments: PaletteAssignmentInput[];
+  previews: ColorPreviewView[];
+}
+
+export interface ReadinessCheckResult {
+  ready: boolean;
+  missingConditions: string[];
+  clarifyingQuestion?: string;
+}
+
+// ─── Marketplace ─────────────────────────────────────────────────────────────
+
 export interface TriageResult {
   canAIResolve: boolean;
   aiGuidance?: string;
