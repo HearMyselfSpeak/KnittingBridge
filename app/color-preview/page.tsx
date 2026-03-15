@@ -28,9 +28,16 @@ export default function ColorPreviewEntryPage() {
         method: "POST",
         body: form,
       });
+      const rawText = await uploadRes.text();
+      console.log("[upload response]", uploadRes.status, rawText);
+      let uploadData;
+      try {
+        uploadData = JSON.parse(rawText);
+      } catch {
+        throw new Error(`Server returned non-JSON (status ${uploadRes.status}): ${rawText.slice(0, 200)}`);
+      }
       if (!uploadRes.ok) {
-        const d = (await uploadRes.json()) as { error?: string };
-        throw new Error(d.error ?? "Upload failed");
+        throw new Error(uploadData.error ?? "Upload failed");
       }
 
       router.push(`/color-preview/${sessionId}`);

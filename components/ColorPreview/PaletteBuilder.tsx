@@ -102,12 +102,14 @@ export function PaletteBuilder({ analysis, sessionId, initialAssignments = [], o
       form.append("sessionId", sessionId);
       form.append("kind", "YARN_PHOTO");
       const res = await fetch("/api/color-preview/upload", { method: "POST", body: form });
-      const data = (await res.json()) as {
-        assetId?: string;
-        publicUrl?: string;
-        colorDescription?: string;
-        error?: string;
-      };
+      const rawText = await res.text();
+      console.log("[yarn upload response]", res.status, rawText);
+      let data: { assetId?: string; publicUrl?: string; colorDescription?: string; error?: string };
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        throw new Error(`Server returned non-JSON (status ${res.status}): ${rawText.slice(0, 200)}`);
+      }
       if (!res.ok) throw new Error(data.error ?? "Upload failed");
       setDirty(true);
       setRegionStates((prev) => ({
