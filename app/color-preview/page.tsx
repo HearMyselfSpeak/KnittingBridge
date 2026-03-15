@@ -33,10 +33,10 @@ export default function ColorPreviewEntryPage() {
       try {
         uploadData = JSON.parse(rawText);
       } catch {
-        throw new Error(`Upload failed (server error ${uploadRes.status})`);
+        throw new Error(`Server error (${uploadRes.status}): ${rawText.slice(0, 300)}`);
       }
       if (!uploadRes.ok) {
-        throw new Error(uploadData.error ?? "Upload failed");
+        throw new Error(uploadData.error ?? `Upload failed (${uploadRes.status})`);
       }
 
       router.push(`/color-preview/${sessionId}`);
