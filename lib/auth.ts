@@ -19,18 +19,24 @@ declare module "next-auth" {
   }
 }
 
+const providers = [
+  Google({
+    clientId: process.env.GOOGLE_CLIENT_ID!,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+  }),
+  ...(process.env.EMAIL_SERVER
+    ? [
+        Nodemailer({
+          server: process.env.EMAIL_SERVER,
+          from: process.env.EMAIL_FROM,
+        }),
+      ]
+    : []),
+];
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma) as Adapter,
-  providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-    Nodemailer({
-      server: process.env.EMAIL_SERVER,
-      from: process.env.EMAIL_FROM,
-    }),
-  ],
+  providers,
   callbacks: {
     session({ session, user }) {
       session.user.id = user.id;
