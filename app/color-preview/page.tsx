@@ -35,7 +35,7 @@ export default function ColorPreviewEntryPage() {
       try {
         uploadData = JSON.parse(rawText);
       } catch {
-        throw new Error(`Server returned non-JSON (status ${uploadRes.status}): ${rawText.slice(0, 200)}`);
+        throw new Error(`Upload failed — file was ${file.size} bytes (${file.type}). Server responded ${uploadRes.status}: ${rawText.slice(0, 300)}`);
       }
       if (!uploadRes.ok) {
         throw new Error(uploadData.error ?? "Upload failed");

@@ -108,7 +108,7 @@ export function PaletteBuilder({ analysis, sessionId, initialAssignments = [], o
       try {
         data = JSON.parse(rawText);
       } catch {
-        throw new Error(`Server returned non-JSON (status ${res.status}): ${rawText.slice(0, 200)}`);
+        throw new Error(`Upload failed — file was ${file.size} bytes (${file.type}). Server responded ${res.status}: ${rawText.slice(0, 300)}`);
       }
       if (!res.ok) throw new Error(data.error ?? "Upload failed");
       setDirty(true);
