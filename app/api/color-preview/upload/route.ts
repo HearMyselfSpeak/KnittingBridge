@@ -127,6 +127,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ assetId: asset.id, publicUrl, colorDescription });
   } catch (error) {
     console.error("[color-preview/upload]", error);
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: `Upload failed: ${message}` }, { status: 500 });
   }
 }
