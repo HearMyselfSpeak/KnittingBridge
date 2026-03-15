@@ -19,8 +19,8 @@ async function normalizeImage(
   if (mimeType === "image/avif") {
     try {
       const sharp = (await import("sharp")).default;
-      const converted = await sharp(buffer).png().toBuffer();
-      return { buffer: converted, mimeType: "image/png", ext: "png" };
+      const converted = await sharp(buffer).jpeg({ quality: 90 }).toBuffer();
+      return { buffer: converted, mimeType: "image/jpeg", ext: "jpg" };
     } catch (err) {
       console.error("[normalizeImage] sharp AVIF conversion failed:", err);
       throw new Error(
