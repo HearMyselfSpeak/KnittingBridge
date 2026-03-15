@@ -103,12 +103,11 @@ export function PaletteBuilder({ analysis, sessionId, initialAssignments = [], o
       form.append("kind", "YARN_PHOTO");
       const res = await fetch("/api/color-preview/upload", { method: "POST", body: form });
       const rawText = await res.text();
-      console.log("[yarn upload response]", res.status, rawText);
       let data: { assetId?: string; publicUrl?: string; colorDescription?: string; error?: string };
       try {
         data = JSON.parse(rawText);
       } catch {
-        throw new Error(`Upload failed — file was ${file.size} bytes (${file.type}). Server responded ${res.status}: ${rawText.slice(0, 300)}`);
+        throw new Error(`Upload failed (server error ${res.status})`);
       }
       if (!res.ok) throw new Error(data.error ?? "Upload failed");
       setDirty(true);

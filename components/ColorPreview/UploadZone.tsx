@@ -18,7 +18,7 @@ export function UploadZone({
   onFileSelected,
   label = "Upload image",
   disabled = false,
-  accept = "image/jpeg,image/png,image/webp",
+  accept = "image/jpeg,image/png,image/webp,image/avif",
 }: Props) {
   const [dragging, setDragging] = useState(false);
   const [sizeError, setSizeError] = useState<string | null>(null);
@@ -93,7 +93,7 @@ export function UploadZone({
               <polyline points="21 15 16 10 5 21" />
             </svg>
             <p className="text-sm font-medium text-foreground">{label}</p>
-            <p className="text-xs text-muted-foreground">JPEG, PNG, or WebP — up to 5 MB</p>
+            <p className="text-xs text-muted-foreground">JPEG, PNG, WebP, or AVIF — up to 5 MB</p>
           </div>
         </button>
 

@@ -8,22 +8,34 @@ interface Props {
   compact?: boolean;
 }
 
+async function compressPastedImage(blob: Blob): Promise<Blob> {
+  if (blob.size <= 4 * 1024 * 1024) return blob;
+  const bitmap = await createImageBitmap(blob);
+  const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+  const ctx = canvas.getContext("2d")!;
+  ctx.drawImage(bitmap, 0, 0);
+  const compressed = await canvas.convertToBlob({ type: "image/jpeg", quality: 0.85 });
+  bitmap.close();
+  return compressed;
+}
+
 export function PasteBox({ onFile, disabled = false, compact = false }: Props) {
   const [focused, setFocused] = useState(false);
   const [pasted, setPasted] = useState(false);
 
   const handleDocPaste = useCallback(
-    (e: ClipboardEvent) => {
+    async (e: ClipboardEvent) => {
       if (!focused || disabled) return;
       const items = Array.from(e.clipboardData?.items ?? []);
       const imageItem = items.find((item) => item.type.startsWith("image/"));
       if (!imageItem) return;
-      const file = imageItem.getAsFile();
-      if (file) {
-        onFile(file);
-        setPasted(true);
-        setTimeout(() => setPasted(false), 1200);
-      }
+      const raw = imageItem.getAsFile();
+      if (!raw) return;
+      const blob = await compressPastedImage(raw);
+      const file = blob === raw ? raw : new File([blob], raw.name || "paste.jpg", { type: blob.type });
+      onFile(file);
+      setPasted(true);
+      setTimeout(() => setPasted(false), 1200);
     },
     [focused, disabled, onFile]
   );

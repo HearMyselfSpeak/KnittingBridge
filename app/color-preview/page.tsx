@@ -24,18 +24,16 @@ export default function ColorPreviewEntryPage() {
       form.append("sessionId", sessionId);
       form.append("kind", "GARMENT_SCREENSHOT");
 
-      console.log("[upload] file size:", file.size, "type:", file.type, "name:", file.name);
       const uploadRes = await fetch("/api/color-preview/upload", {
         method: "POST",
         body: form,
       });
       const rawText = await uploadRes.text();
-      console.log("[upload response]", uploadRes.status, rawText);
       let uploadData;
       try {
         uploadData = JSON.parse(rawText);
       } catch {
-        throw new Error(`Upload failed — file was ${file.size} bytes (${file.type}). Server responded ${uploadRes.status}: ${rawText.slice(0, 300)}`);
+        throw new Error(`Upload failed (server error ${uploadRes.status})`);
       }
       if (!uploadRes.ok) {
         throw new Error(uploadData.error ?? "Upload failed");
