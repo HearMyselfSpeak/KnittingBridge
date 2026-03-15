@@ -24,6 +24,7 @@ export default function ColorPreviewEntryPage() {
       form.append("sessionId", sessionId);
       form.append("kind", "GARMENT_SCREENSHOT");
 
+      console.log("[upload] file size:", file.size, "type:", file.type, "name:", file.name);
       const uploadRes = await fetch("/api/color-preview/upload", {
         method: "POST",
         body: form,
