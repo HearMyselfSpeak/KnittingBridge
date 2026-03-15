@@ -17,9 +17,16 @@ async function normalizeImage(
   mimeType: string
 ): Promise<{ buffer: Buffer; mimeType: string; ext: string }> {
   if (mimeType === "image/avif") {
-    const sharp = (await import("sharp")).default;
-    const converted = await sharp(buffer).png().toBuffer();
-    return { buffer: converted, mimeType: "image/png", ext: "png" };
+    try {
+      const sharp = (await import("sharp")).default;
+      const converted = await sharp(buffer).png().toBuffer();
+      return { buffer: converted, mimeType: "image/png", ext: "png" };
+    } catch (err) {
+      console.error("[normalizeImage] sharp AVIF conversion failed:", err);
+      throw new Error(
+        `AVIF conversion failed: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
   }
   const ext =
     mimeType === "image/png"
