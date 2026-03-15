@@ -7,8 +7,28 @@ import { UploadAssetInput } from "@/lib/validation";
 import { uploadFile, makeStorageKey, getPublicUrl } from "@/lib/storage";
 import { randomUUID } from "crypto";
 
-const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp"];
+const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+
+// AVIF is not supported by Supabase Storage public serving or the OpenRouter vision
+// model — convert it to PNG server-side before upload and analysis.
+async function normalizeImage(
+  buffer: Buffer,
+  mimeType: string
+): Promise<{ buffer: Buffer; mimeType: string; ext: string }> {
+  if (mimeType === "image/avif") {
+    const sharp = (await import("sharp")).default;
+    const converted = await sharp(buffer).png().toBuffer();
+    return { buffer: converted, mimeType: "image/png", ext: "png" };
+  }
+  const ext =
+    mimeType === "image/png"
+      ? "png"
+      : mimeType === "image/webp"
+        ? "webp"
+        : "jpg";
+  return { buffer, mimeType, ext };
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -33,7 +53,7 @@ export async function POST(req: NextRequest) {
     // Validate file
     if (!ALLOWED_MIME.includes(file.type)) {
       return NextResponse.json(
-        { error: "Only JPEG, PNG, and WebP images are accepted" },
+        { error: "Only JPEG, PNG, WebP, and AVIF images are accepted" },
         { status: 400 }
       );
     }
@@ -58,12 +78,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
+    // Normalize image — AVIF is converted to PNG for storage and vision compatibility
+    const rawBuffer = Buffer.from(await file.arrayBuffer());
+    const { buffer, mimeType: normalizedMime, ext } = await normalizeImage(rawBuffer, file.type);
+
     // Upload to storage
     const assetId = randomUUID();
-    const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
     const storageKey = makeStorageKey(parsed.data.sessionId, assetId, ext);
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await uploadFile(storageKey, buffer, file.type);
+    await uploadFile(storageKey, buffer, normalizedMime);
 
     // Create asset record
     const asset = await prisma.uploadedAsset.create({
@@ -71,9 +93,9 @@ export async function POST(req: NextRequest) {
         id: assetId,
         colorSessionId: parsed.data.sessionId,
         kind: parsed.data.kind,
-        mimeType: file.type,
+        mimeType: normalizedMime,
         storageKey,
-        fileSize: file.size,
+        fileSize: buffer.length,
       },
     });
 
