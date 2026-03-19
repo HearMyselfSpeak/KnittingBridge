@@ -2,9 +2,9 @@
 
 const STEPS = [
   "Identity",
+  "Skills",
   "Experience",
-  "Snapshot",
-  "Sample Work",
+  "Samples",
   "Scenarios",
   "Availability",
   "Agreements",
