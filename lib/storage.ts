@@ -60,6 +60,26 @@ export function makeStorageKey(
   return `sessions/${sessionId}/${assetId}.${ext}`;
 }
 
+/** Upload to an arbitrary bucket (e.g. "guide-applications"). */
+export async function uploadFileToBucket(
+  bucket: string,
+  storageKey: string,
+  buffer: Buffer,
+  mimeType: string
+): Promise<string> {
+  const { error } = await client()
+    .storage.from(bucket)
+    .upload(storageKey, buffer, { contentType: mimeType, upsert: false });
+  if (error) throw new Error(`Storage upload failed: ${error.message}`);
+  return storageKey;
+}
+
+/** Get a public URL from an arbitrary bucket. */
+export function getPublicUrlFromBucket(bucket: string, storageKey: string): string {
+  const { data } = client().storage.from(bucket).getPublicUrl(storageKey);
+  return data.publicUrl;
+}
+
 /**
  * Decode a base64-encoded PNG returned by an AI image edit API and persist it
  * to Supabase Storage. Returns the public URL of the stored file.
