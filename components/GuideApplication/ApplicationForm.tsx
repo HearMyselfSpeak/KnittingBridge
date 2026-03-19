@@ -97,6 +97,21 @@ export function ApplicationForm() {
     }
   }
 
+  // Update data and immediately clear any errors that the new value resolves.
+  // Never adds new errors on change — only removes resolved ones.
+  function handleChange(newData: ApplicationFormData) {
+    setData(newData);
+    setErrors((prev) => {
+      if (Object.keys(prev).length === 0) return prev;
+      const stillFailing = validateStep(step, newData);
+      const next: Record<string, string> = {};
+      for (const key of Object.keys(prev)) {
+        if (stillFailing[key]) next[key] = prev[key];
+      }
+      return next;
+    });
+  }
+
   function handleNext() {
     const errs = validateStep(step, data);
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
@@ -111,13 +126,13 @@ export function ApplicationForm() {
     <div className="w-full max-w-xl mx-auto">
       <ProgressBar current={step} />
       <div className="rounded-xl border border-border bg-card p-6 sm:p-8">
-        {step === 1 && <StepIdentity data={data.identity} onChange={(d) => setData({ ...data, identity: d })} errors={errors} />}
-        {step === 2 && <StepExperienceAreas data={data.experienceAreas} onChange={(d) => setData({ ...data, experienceAreas: d })} errors={errors} />}
-        {step === 3 && <StepExperienceSnapshot data={data.experienceSnapshot} onChange={(d) => setData({ ...data, experienceSnapshot: d })} errors={errors} />}
-        {step === 4 && <StepSampleWork images={data.sampleWork} onChange={(imgs) => setData({ ...data, sampleWork: imgs })} errors={errors} />}
-        {step === 5 && <StepScenarioResponses data={data.scenarios} onChange={(d) => setData({ ...data, scenarios: d })} errors={errors} />}
-        {step === 6 && <StepAvailability data={data.availability} onChange={(d) => setData({ ...data, availability: d })} errors={errors} />}
-        {step === 7 && <StepAgreements data={data.agreements} onChange={(d) => setData({ ...data, agreements: d })} errors={errors} />}
+        {step === 1 && <StepIdentity data={data.identity} onChange={(d) => handleChange({ ...data, identity: d })} errors={errors} />}
+        {step === 2 && <StepExperienceAreas data={data.experienceAreas} onChange={(d) => handleChange({ ...data, experienceAreas: d })} errors={errors} />}
+        {step === 3 && <StepExperienceSnapshot data={data.experienceSnapshot} onChange={(d) => handleChange({ ...data, experienceSnapshot: d })} errors={errors} />}
+        {step === 4 && <StepSampleWork images={data.sampleWork} onChange={(imgs) => handleChange({ ...data, sampleWork: imgs })} errors={errors} />}
+        {step === 5 && <StepScenarioResponses data={data.scenarios} onChange={(d) => handleChange({ ...data, scenarios: d })} errors={errors} />}
+        {step === 6 && <StepAvailability data={data.availability} onChange={(d) => handleChange({ ...data, availability: d })} errors={errors} />}
+        {step === 7 && <StepAgreements data={data.agreements} onChange={(d) => handleChange({ ...data, agreements: d })} errors={errors} />}
 
         <div className="mt-8 pt-6 border-t border-border space-y-3">
           {submitError && <p className="text-sm text-destructive">{submitError}</p>}
