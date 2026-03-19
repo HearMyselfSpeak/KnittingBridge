@@ -50,7 +50,7 @@ function validateStep(step: number, data: ApplicationFormData): Record<string, s
   if (step === 2) collectZodErrors(StepExperienceAreasSchema.safeParse(data.experienceAreas), errors);
   if (step === 3) collectZodErrors(StepExperienceSnapshotSchema.safeParse(data.experienceSnapshot), errors);
   if (step === 4) {
-    if (data.sampleWork.length < 1) errors.images = "Please add at least one photo of your work. We'd love to see it.";
+    if (data.sampleWork.length < 1) errors.images = "Please add at least one photo.";
     data.sampleWork.forEach((img, i) => {
       const r = SampleCaptionSchema.safeParse(img.caption);
       if (!r.success) errors[`caption_${i}`] = r.error.issues[0].message;

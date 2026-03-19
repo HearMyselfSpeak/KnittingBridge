@@ -22,11 +22,11 @@ export function StepSampleWork({ images, onChange, errors }: Props) {
 
   function handleFile(file: File) {
     if (!file.type.startsWith("image/")) {
-      setSizeError("Please upload an image file (JPEG, PNG, WebP, or AVIF).");
+      setSizeError("Please select a JPEG, PNG, WebP, or AVIF image.");
       return;
     }
     if (file.size > SIZE_LIMIT) {
-      setSizeError("That image is a bit large. Please keep each photo under 5 MB.");
+      setSizeError("Image must be under 5 MB.");
       return;
     }
     setSizeError(null);

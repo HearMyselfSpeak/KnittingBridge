@@ -5,19 +5,26 @@ import { z } from "zod";
 // .min(1, ...) sets the message when the value is an empty string.
 export const StepIdentitySchema = z.object({
   fullName: z
-    .string({ error: "We'd love to know your name" })
-    .min(1, "We'd love to know your name")
-    .max(100, "Please keep your name under 100 characters"),
+    .string({ error: "Please enter your full name" })
+    .min(1, "Please enter your full name")
+    .max(100, "Name must be 100 characters or fewer")
+    .refine(
+      (val) => {
+        const parts = val.trim().split(/\s+/);
+        return parts.length >= 2 && parts[parts.length - 1].length >= 2;
+      },
+      "Please enter your first and last name (last name must be at least 2 characters)"
+    ),
   email: z
-    .string({ error: "Please share a valid email address so we can stay in touch" })
-    .email("Please share a valid email address so we can stay in touch"),
+    .string({ error: "Please enter a valid email address" })
+    .email("Please enter a valid email address"),
   location: z
-    .string({ error: "Let us know where you're located" })
-    .min(1, "Let us know where you're located")
-    .max(100, "Please keep your location under 100 characters"),
+    .string({ error: "Please enter your city or region" })
+    .min(1, "Please enter your city or region")
+    .max(100, "City or region must be 100 characters or fewer"),
   timezone: z
-    .string({ error: "Please pick the timezone that fits you best" })
-    .min(1, "Please pick the timezone that fits you best"),
+    .string({ error: "Please select a timezone" })
+    .min(1, "Please select a timezone"),
 });
 export type StepIdentityData = z.infer<typeof StepIdentitySchema>;
 
@@ -38,34 +45,34 @@ export type ExperienceAreaId = (typeof EXPERIENCE_AREAS)[number]["id"];
 
 export const StepExperienceAreasSchema = z.object({
   areas: z
-    .array(z.string(), { error: "Please select at least one area you feel confident in" })
-    .min(1, "Please select at least one area you feel confident in"),
+    .array(z.string(), { error: "Please select at least one area" })
+    .min(1, "Please select at least one area"),
 });
 export type StepExperienceAreasData = z.infer<typeof StepExperienceAreasSchema>;
 
 // Step 3 — Experience Snapshot
 export const StepExperienceSnapshotSchema = z.object({
   yearsKnitting: z
-    .number({ error: "Please let us know how many years you've been knitting" })
+    .number({ error: "Please enter your years of knitting experience" })
     .int("Please enter a whole number")
     .min(0, "Please enter a number between 0 and 80")
     .max(80, "Please enter a number between 0 and 80"),
   projectTypes: z
-    .string({ error: "Tell us a little more about the projects you've completed" })
-    .min(10, "Tell us a little more about the projects you've completed")
-    .max(200, "That's wonderfully detailed. Please keep it to 200 characters or less."),
+    .string({ error: "Please enter at least 10 characters" })
+    .min(10, "Please enter at least 10 characters")
+    .max(200, "Please keep this to 200 characters or fewer"),
   helpContext: z
-    .string({ error: "We'd love a little more detail about where you help others" })
-    .min(20, "We'd love a little more detail about where you help others")
-    .max(300, "Please keep this to 300 characters or less"),
+    .string({ error: "Please enter at least 20 characters" })
+    .min(20, "Please enter at least 20 characters")
+    .max(300, "Please keep this to 300 characters or fewer"),
 });
 export type StepExperienceSnapshotData = z.infer<typeof StepExperienceSnapshotSchema>;
 
 // Step 4 — Sample Work (file objects held client-side; captions validated here)
 export const SampleCaptionSchema = z
-  .string({ error: "Please tell us a little about this project. At least 20 characters." })
-  .min(20, "Please tell us a little about this project. At least 20 characters.")
-  .max(500, "Please keep your description to 500 characters or less");
+  .string({ error: "Please add a description for this image (at least 20 characters)" })
+  .min(20, "Please add a description for this image (at least 20 characters)")
+  .max(500, "Please keep your description to 500 characters or fewer");
 
 export type SampleImageData = {
   file: File;
@@ -75,9 +82,9 @@ export type SampleImageData = {
 
 // Step 5 — Scenario Responses
 const scenarioField = z
-  .string({ error: "Please share a bit more. At least 50 characters." })
-  .min(50, "Please share a bit more. At least 50 characters.")
-  .max(500, "Please keep your response to 500 characters or less");
+  .string({ error: "Please enter a response (at least 50 characters)" })
+  .min(50, "Please enter at least 50 characters")
+  .max(500, "Please keep your response to 500 characters or fewer");
 
 export const StepScenariosSchema = z.object({
   scenarioOne:   scenarioField,
@@ -93,13 +100,13 @@ export type WeeklyHoursOption = (typeof WEEKLY_HOURS_OPTIONS)[number];
 export const StepAvailabilitySchema = z
   .object({
     availabilityType: z.enum(["async", "both"], {
-      error: "Please let us know how you'd like to work with Makers",
+      error: "Please select an availability option",
     }),
     weeklyHours: z.enum(WEEKLY_HOURS_OPTIONS).optional(),
   })
   .refine(
     (d) => d.availabilityType !== "both" || !!d.weeklyHours,
-    { message: "Please select how many hours per week you're available", path: ["weeklyHours"] }
+    { message: "Please select your weekly availability", path: ["weeklyHours"] }
   );
 export type StepAvailabilityData = z.infer<typeof StepAvailabilitySchema>;
 

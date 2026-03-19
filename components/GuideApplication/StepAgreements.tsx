@@ -79,7 +79,7 @@ export function StepAgreements({ data, onChange, errors }: Props) {
 
       {hasErrors && (
         <p className="text-sm text-destructive">
-          Please acknowledge each item above before you continue.
+          Please acknowledge all items to continue.
         </p>
       )}
     </div>
