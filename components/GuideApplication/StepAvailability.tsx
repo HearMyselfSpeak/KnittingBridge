@@ -20,7 +20,7 @@ const OPTIONS: {
     value: "async",
     label: "Async only",
     description:
-      "You communicate via text — messages, voice notes, photos. No live video sessions.",
+      "You communicate via text: messages, voice notes, photos. No live video sessions.",
   },
   {
     value: "both",

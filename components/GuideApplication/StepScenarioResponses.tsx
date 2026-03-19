@@ -45,7 +45,7 @@ export function StepScenarioResponses({ data, onChange, errors }: Props) {
           Scenario responses
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Three short questions. There are no right answers — we want to hear how you think.
+          Three short questions. There are no right answers. We want to hear how you think.
         </p>
       </div>
 

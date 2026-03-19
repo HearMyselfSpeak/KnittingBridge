@@ -26,7 +26,7 @@ export function StepSampleWork({ images, onChange, errors }: Props) {
       return;
     }
     if (file.size > SIZE_LIMIT) {
-      setSizeError("That image is a bit large — please keep each photo under 5 MB.");
+      setSizeError("That image is a bit large. Please keep each photo under 5 MB.");
       return;
     }
     setSizeError(null);
@@ -55,7 +55,7 @@ export function StepSampleWork({ images, onChange, errors }: Props) {
         <h2 className="font-serif text-2xl font-semibold text-foreground">Sample work</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Share 1–3 finished project photos with a short description of each. JPEG, PNG,
-          WebP, or AVIF — up to 5 MB each.
+          WebP, or AVIF, up to 5 MB each.
         </p>
       </div>
 
@@ -90,7 +90,7 @@ export function StepSampleWork({ images, onChange, errors }: Props) {
                 <textarea
                   value={img.caption}
                   onChange={(e) => updateCaption(i, e.target.value)}
-                  placeholder="Describe this project — what it is, any techniques used, what makes it representative of your work..."
+                  placeholder="Describe this project: what it is, any techniques used, what makes it representative of your work..."
                   maxLength={500}
                   rows={3}
                   className={textareaClass}

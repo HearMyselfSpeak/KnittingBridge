@@ -51,7 +51,7 @@ export const StepExperienceSnapshotSchema = z.object({
   projectTypes: z
     .string()
     .min(10, "Tell us a little more about the projects you've completed")
-    .max(200, "That's wonderfully detailed — please keep it to 200 characters or less"),
+    .max(200, "That's wonderfully detailed. Please keep it to 200 characters or less."),
   helpContext: z
     .string()
     .min(20, "We'd love a little more detail about where you help others")
@@ -62,7 +62,7 @@ export type StepExperienceSnapshotData = z.infer<typeof StepExperienceSnapshotSc
 // Step 4 — Sample Work (file objects held client-side; captions validated here)
 export const SampleCaptionSchema = z
   .string()
-  .min(20, "Please tell us a little about this project — at least 20 characters")
+  .min(20, "Please tell us a little about this project. At least 20 characters.")
   .max(500, "Please keep your description to 500 characters or less");
 
 export type SampleImageData = {
@@ -73,9 +73,9 @@ export type SampleImageData = {
 
 // Step 5 — Scenario Responses
 export const StepScenariosSchema = z.object({
-  scenarioOne:   z.string().min(50, "Please share a bit more — at least 50 characters").max(500, "Please keep your response to 500 characters or less"),
-  scenarioTwo:   z.string().min(50, "Please share a bit more — at least 50 characters").max(500, "Please keep your response to 500 characters or less"),
-  scenarioThree: z.string().min(50, "Please share a bit more — at least 50 characters").max(500, "Please keep your response to 500 characters or less"),
+  scenarioOne:   z.string().min(50, "Please share a bit more. At least 50 characters.").max(500, "Please keep your response to 500 characters or less"),
+  scenarioTwo:   z.string().min(50, "Please share a bit more. At least 50 characters.").max(500, "Please keep your response to 500 characters or less"),
+  scenarioThree: z.string().min(50, "Please share a bit more. At least 50 characters.").max(500, "Please keep your response to 500 characters or less"),
 });
 export type StepScenariosData = z.infer<typeof StepScenariosSchema>;
 
