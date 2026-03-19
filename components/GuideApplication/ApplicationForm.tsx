@@ -136,6 +136,11 @@ export function ApplicationForm() {
 
         <div className="mt-8 pt-6 border-t border-border space-y-3">
           {submitError && <p className="text-sm text-destructive">{submitError}</p>}
+          {step === 4 && Object.keys(errors).some((k) => k.startsWith("caption_")) && (
+            <p className="text-sm text-destructive">
+              Please complete the description for each image before continuing.
+            </p>
+          )}
           <div className="flex justify-between items-center">
             <button type="button" onClick={handleBack} disabled={step === 1 || submitting}
               className="text-sm font-medium text-muted-foreground hover:text-foreground disabled:opacity-0 disabled:pointer-events-none transition-colors">
