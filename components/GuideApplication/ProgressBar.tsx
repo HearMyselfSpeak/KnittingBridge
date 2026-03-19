@@ -12,75 +12,80 @@ const STEPS = [
 
 const TOTAL = STEPS.length;
 
+function Check() {
+  return (
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden>
+      <polyline
+        points="1.5 5 4 7.5 8.5 2.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function ProgressBar({ current }: { current: number }) {
+  const fraction = (current - 1) / (TOTAL - 1);
+
   return (
     <div className="w-full mb-8">
-      {/* Desktop: step labels */}
-      <div className="hidden sm:flex items-center gap-0.5 mb-3">
-        {STEPS.map((label, i) => {
-          const step = i + 1;
-          const isActive = step === current;
-          const isDone = step < current;
-          return (
-            <div key={label} className="flex items-center gap-0.5 flex-1 min-w-0">
-              <span
-                className={[
-                  "text-xs font-medium px-2 py-0.5 rounded-full truncate",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : isDone
-                    ? "text-accent"
-                    : "text-muted-foreground",
-                ].join(" ")}
-              >
-                {label}
-              </span>
-              {i < TOTAL - 1 && (
-                <span className="text-muted-foreground/30 text-xs flex-shrink-0">—</span>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Mobile: numbered circles */}
-      <div className="flex sm:hidden items-center gap-1 mb-3">
-        {STEPS.map((label, i) => {
-          const step = i + 1;
-          const isActive = step === current;
-          const isDone = step < current;
-          return (
-            <div key={label} className="flex items-center gap-1">
-              <span
-                className={[
-                  "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : isDone
-                    ? "bg-accent/20 text-accent"
-                    : "bg-muted text-muted-foreground",
-                ].join(" ")}
-              >
-                {step}
-              </span>
-              {i < TOTAL - 1 && (
-                <span className="text-muted-foreground/30 text-xs">–</span>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Progress bar */}
-      <div className="h-1 bg-muted rounded-full overflow-hidden">
+      {/* Circle + line track */}
+      <div className="relative px-3">
+        {/* Background track — spans center-to-center of outer circles */}
+        <div className="absolute top-3 inset-x-3 h-px bg-border" />
+        {/* Filled track */}
         <div
-          className="h-full bg-primary transition-all duration-300 rounded-full"
-          style={{ width: `${((current - 1) / (TOTAL - 1)) * 100}%` }}
+          className="absolute top-3 left-3 h-px bg-primary transition-all duration-300"
+          style={{
+            width: `calc(${fraction * 100}% - ${fraction * 1.5}rem)`,
+          }}
         />
+
+        {/* Circles */}
+        <div className="relative z-10 flex justify-between">
+          {STEPS.map((label, i) => {
+            const step = i + 1;
+            const isDone = step < current;
+            const isActive = step === current;
+
+            return (
+              <div key={label} className="flex flex-col items-center">
+                <div
+                  className={[
+                    "w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200",
+                    isDone
+                      ? "bg-primary text-primary-foreground"
+                      : isActive
+                      ? "bg-primary text-primary-foreground ring-2 ring-primary/25 ring-offset-2 ring-offset-background"
+                      : "bg-background border-2 border-border text-muted-foreground",
+                  ].join(" ")}
+                >
+                  {isDone ? (
+                    <Check />
+                  ) : (
+                    <span className="text-[10px] font-semibold leading-none">{step}</span>
+                  )}
+                </div>
+
+                {/* Desktop label */}
+                <span
+                  className={[
+                    "hidden sm:block mt-2 text-[10px] font-medium text-center whitespace-nowrap",
+                    isActive ? "text-foreground" : "text-muted-foreground",
+                  ].join(" ")}
+                >
+                  {label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Mobile: active label */}
-      <p className="sm:hidden mt-1.5 text-xs text-muted-foreground">
+      <p className="sm:hidden mt-3 text-xs text-muted-foreground text-center">
         Step {current} of {TOTAL}:{" "}
         <span className="font-medium text-foreground">{STEPS[current - 1]}</span>
       </p>
