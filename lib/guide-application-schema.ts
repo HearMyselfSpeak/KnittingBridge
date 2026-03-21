@@ -62,9 +62,8 @@ export const StepExperienceSnapshotSchema = z.object({
     .min(10, "Please enter at least 10 characters")
     .max(200, "Please keep this to 200 characters or fewer"),
   helpContext: z
-    .string({ error: "Please enter at least 20 characters" })
-    .min(20, "Please enter at least 20 characters")
-    .max(300, "Please keep this to 300 characters or fewer"),
+    .array(z.string(), { error: "Please select at least one" })
+    .min(1, "Please select at least one"),
 });
 export type StepExperienceSnapshotData = z.infer<typeof StepExperienceSnapshotSchema>;
 

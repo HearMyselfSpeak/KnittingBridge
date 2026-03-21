@@ -17,7 +17,7 @@ const ApplySchema = z.object({
   areas:             z.array(z.string()).min(1),
   yearsKnitting:     z.number().int().min(0).max(80),
   projectTypes:      z.string().min(10).max(200),
-  helpContext:       z.string().min(20).max(300),
+  helpContext:       z.array(z.string()).min(1),
   imageCount:        z.number().int().min(1).max(3),
   scenarioOne:       z.string().min(50).max(500),
   scenarioTwo:       z.string().min(50).max(500),

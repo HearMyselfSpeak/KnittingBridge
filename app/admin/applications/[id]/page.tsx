@@ -17,7 +17,7 @@ const AREA_LABELS: Record<string, string> = {
 
 type ScenarioData = {
   q1?: string; q2?: string; q3?: string;
-  projectTypes?: string; helpContext?: string; sampleCaptions?: string[];
+  projectTypes?: string; helpContext?: string[]; sampleCaptions?: string[];
 };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -108,7 +108,7 @@ export default async function ApplicationDetailPage({ params }: Props) {
         <Section title="Experience Snapshot">
           <Field label="Years knitting" value={profile.yearsExperience} />
           <Field label="Project types" value={sc.projectTypes} />
-          <Field label="Where they help others" value={sc.helpContext} />
+          <Field label="Where they help others" value={sc.helpContext?.join(", ")} />
         </Section>
 
         <Section title="Sample Work">
