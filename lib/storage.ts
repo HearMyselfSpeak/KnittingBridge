@@ -11,6 +11,14 @@ function client() {
   return createClient(url, key);
 }
 
+/** Server-side client using the service role key — bypasses RLS. Only use in API routes. */
+function serviceClient() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new Error("SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set");
+  return createClient(url, key);
+}
+
 /** Upload a buffer to Supabase Storage. Returns the storage key. */
 export async function uploadFile(
   storageKey: string,
@@ -60,14 +68,15 @@ export function makeStorageKey(
   return `sessions/${sessionId}/${assetId}.${ext}`;
 }
 
-/** Upload to an arbitrary bucket (e.g. "guide-applications"). */
+/** Upload to an arbitrary bucket (e.g. "guide-applications").
+ *  Uses the service role key to bypass RLS — only call from server-side API routes. */
 export async function uploadFileToBucket(
   bucket: string,
   storageKey: string,
   buffer: Buffer,
   mimeType: string
 ): Promise<string> {
-  const { error } = await client()
+  const { error } = await serviceClient()
     .storage.from(bucket)
     .upload(storageKey, buffer, { contentType: mimeType, upsert: false });
   if (error) throw new Error(`Storage upload failed: ${error.message}`);
