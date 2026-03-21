@@ -56,7 +56,11 @@ export async function POST(req: NextRequest) {
 
     const parsed = ApplySchema.safeParse(JSON.parse(payloadRaw));
     if (!parsed.success) {
-      return NextResponse.json({ error: "Validation failed", issues: parsed.error.issues }, { status: 400 });
+      console.error("[guides/apply] schema validation failed", parsed.error.issues);
+      return NextResponse.json(
+        { error: "Some fields could not be saved", issues: parsed.error.issues },
+        { status: 400 }
+      );
     }
     const p = parsed.data;
 

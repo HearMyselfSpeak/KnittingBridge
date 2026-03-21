@@ -62,6 +62,41 @@ function validateStep(step: number, data: ApplicationFormData): Record<string, s
   return errors;
 }
 
+const FIELD_LABELS: Record<string, string> = {
+  fullName:         "Full name",
+  email:            "Email address",
+  location:         "Location",
+  timezone:         "Timezone",
+  areas:            "Experience areas",
+  yearsKnitting:    "Years of knitting experience",
+  projectTypes:     "Project types",
+  helpContext:      "Where you help others",
+  imageCount:       "Sample photos",
+  scenarioOne:      "Scenario response 1",
+  scenarioTwo:      "Scenario response 2",
+  scenarioThree:    "Scenario response 3",
+  availabilityType: "Availability",
+  weeklyHours:      "Weekly hours",
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildSubmitError(json: any): string {
+  const issues: { path: (string | number)[]; message: string }[] = json.issues ?? [];
+  if (issues.length === 0) {
+    return json.error ?? "Submission failed. Please try again.";
+  }
+  const fields = [...new Set(
+    issues
+      .map((i) => String(i.path[0] ?? ""))
+      .filter(Boolean)
+      .map((f) => FIELD_LABELS[f] ?? f)
+  )];
+  if (fields.length === 0) {
+    return issues[0].message ?? "Submission failed. Please try again.";
+  }
+  return `Please go back and review: ${fields.join(", ")}.`;
+}
+
 export function ApplicationForm() {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -86,7 +121,13 @@ export function ApplicationForm() {
       const res = await fetch("/api/guides/apply", { method: "POST", body: fd });
       const json = await res.json();
       if (!res.ok) {
-        setSubmitError(json.error ?? "Submission failed. Please try again.");
+        // Log full details so we can diagnose what the server rejected.
+        console.error("[apply] submission failed", {
+          status: res.status,
+          error: json.error,
+          issues: json.issues ?? [],
+        });
+        setSubmitError(buildSubmitError(json));
       } else {
         router.push(`/guides/apply/confirmation?id=${json.profileId}&email=${encodeURIComponent(data.identity.email ?? "")}`);
       }
