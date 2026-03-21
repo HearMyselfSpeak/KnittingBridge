@@ -68,11 +68,13 @@ export function StepExperienceSnapshot({ data, onChange, errors }: Props) {
   }
 
   function commitOther() {
-    const entries = otherValue
+    const newItems = otherValue
       .split(",")
       .map((s) => s.trim())
-      .filter(Boolean);
-    entries.forEach(addItem);
+      .filter((s) => s && !selected.includes(s));
+    if (newItems.length > 0) {
+      update({ helpContext: [...selected, ...newItems] });
+    }
     setOtherValue("");
     setShowOther(false);
   }
