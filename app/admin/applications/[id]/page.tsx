@@ -134,7 +134,7 @@ export default async function ApplicationDetailPage({ params }: Props) {
         </Section>
 
         <Section title="Availability">
-          <Field label="Session type" value={profile.asyncOnly ? "Async only" : "Open to both async and live"} />
+          <Field label="Session type" value={profile.asyncOnly ? "Messaging only (no video calls)" : "Messaging and video calls"} />
           {!profile.asyncOnly && profile.weeklyHours != null && (
             <Field label="Weekly hours" value={`${profile.weeklyHours}+ hrs/week`} />
           )}

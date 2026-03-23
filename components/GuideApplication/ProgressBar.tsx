@@ -7,7 +7,7 @@ const STEPS = [
   "Samples",
   "Scenarios",
   "Availability",
-  "Agreements",
+  "Review",
 ];
 
 const TOTAL = STEPS.length;

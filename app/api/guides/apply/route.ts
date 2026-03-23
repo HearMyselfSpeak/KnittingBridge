@@ -122,6 +122,44 @@ export async function POST(req: NextRequest) {
       create: { userId: user.id, ...profileData },
     });
 
+    // Send confirmation email -- non-blocking, never fails the submission
+    if (process.env.RESEND_API_KEY) {
+      try {
+        const { Resend } = await import("resend");
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        const from = process.env.EMAIL_FROM ?? "KnittingBridge <no-reply@knittingbridge.com>";
+        const firstName = p.fullName.split(" ")[0];
+        await resend.emails.send({
+          from,
+          to: p.email,
+          subject: "We received your Guide application",
+          html: `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#FAF8F5;font-family:Georgia,serif;color:#1B2A4A">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 20px">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;padding:40px">
+        <tr><td style="padding-bottom:24px;border-bottom:1px solid #e8e3dc">
+          <span style="font-size:18px;font-weight:bold;letter-spacing:-0.3px">KnittingBridge</span>
+        </td></tr>
+        <tr><td style="padding-top:32px;padding-bottom:24px">
+          <p style="margin:0 0 16px;font-size:16px;line-height:1.6">Hi ${firstName},</p>
+          <p style="margin:0 0 16px;font-size:16px;line-height:1.6">We received your application to become a KnittingBridge Guide. Thank you for taking the time to share your experience with us.</p>
+          <p style="margin:0 0 16px;font-size:16px;line-height:1.6">Our team will review your application and get back to you within 24 hours.</p>
+          <p style="margin:0;font-size:16px;line-height:1.6">The KnittingBridge Team</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`,
+        });
+      } catch (emailErr) {
+        console.error("[guides/apply] confirmation email failed:", emailErr);
+      }
+    }
+
     return NextResponse.json({ profileId: profile.id, status: "PENDING" });
   } catch (error) {
     console.error("[guides/apply]", error);

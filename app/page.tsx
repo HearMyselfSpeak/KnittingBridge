@@ -195,12 +195,20 @@ export default function Home() {
               sessions. No lesson plans. No marketing. Accept the requests that
               fit your schedule.
             </p>
-            <Link
-              href="/guides"
-              className="inline-flex items-center justify-center bg-primary-foreground text-primary text-sm font-medium px-6 py-3 rounded-md hover:opacity-90 transition-opacity"
-            >
-              Learn about becoming a Guide
-            </Link>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/guides/apply"
+                className="inline-flex items-center justify-center bg-primary-foreground text-primary text-sm font-medium px-6 py-3 rounded-md hover:opacity-90 transition-opacity"
+              >
+                Become a Guide
+              </Link>
+              <Link
+                href="/guides"
+                className="inline-flex items-center justify-center text-primary-foreground/80 text-sm font-medium px-4 py-3 rounded-md hover:text-primary-foreground transition-colors underline-offset-2 hover:underline"
+              >
+                Learn about becoming a Guide
+              </Link>
+            </div>
           </div>
         </div>
       </section>

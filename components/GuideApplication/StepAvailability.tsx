@@ -18,15 +18,15 @@ const OPTIONS: {
 }[] = [
   {
     value: "async",
-    label: "Async only",
+    label: "Messaging only (no video calls)",
     description:
       "You communicate via text: messages, voice notes, photos. No live video sessions.",
   },
   {
     value: "both",
-    label: "Open to both",
+    label: "Messaging and video calls",
     description:
-      "You are willing to do async messaging and live video sessions with Makers.",
+      "You are willing to do messaging and live video sessions with Makers.",
   },
 ];
 

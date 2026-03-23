@@ -65,7 +65,7 @@ export default function GuidesHowItWorks() {
             {
               step: "06",
               title: "Availability",
-              body: "Async only, or open to live sessions as well. Weekly availability range. You can update this later from your dashboard.",
+              body: "Messaging only, or messaging and video calls. Weekly availability range. You can update this later from your dashboard.",
             },
             {
               step: "07",

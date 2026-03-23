@@ -9,17 +9,9 @@ import { StepExperienceSnapshot } from "./StepExperienceSnapshot";
 import { StepSampleWork } from "./StepSampleWork";
 import { StepScenarioResponses } from "./StepScenarioResponses";
 import { StepAvailability } from "./StepAvailability";
-import { StepAgreements } from "./StepAgreements";
-import {
-  StepIdentitySchema,
-  StepExperienceAreasSchema,
-  StepExperienceSnapshotSchema,
-  StepScenariosSchema,
-  StepAvailabilitySchema,
-  StepAgreementsSchema,
-  SampleCaptionSchema,
-  type ApplicationFormData,
-} from "@/lib/guide-application-schema";
+import { StepReview } from "./StepReview";
+import { StepAgreementsSchema, type ApplicationFormData } from "@/lib/guide-application-schema";
+import { validateStep, buildSubmitError } from "@/lib/guide-application-validate";
 
 const TOTAL_STEPS = 7;
 
@@ -33,70 +25,6 @@ const EMPTY: ApplicationFormData = {
   agreements:         {},
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function collectZodErrors(result: any, out: Record<string, string>) {
-  if (!result.success) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (result.error.issues ?? result.error.errors ?? []).forEach((e: any) => {
-      const key = String(e.path[0] ?? "");
-      if (key && !out[key]) out[key] = e.message;
-    });
-  }
-}
-
-function validateStep(step: number, data: ApplicationFormData): Record<string, string> {
-  const errors: Record<string, string> = {};
-  if (step === 1) collectZodErrors(StepIdentitySchema.safeParse(data.identity), errors);
-  if (step === 2) collectZodErrors(StepExperienceAreasSchema.safeParse(data.experienceAreas), errors);
-  if (step === 3) collectZodErrors(StepExperienceSnapshotSchema.safeParse(data.experienceSnapshot), errors);
-  if (step === 4) {
-    if (data.sampleWork.length < 1) errors.images = "Please add at least one photo.";
-    data.sampleWork.forEach((img, i) => {
-      const r = SampleCaptionSchema.safeParse(img.caption);
-      if (!r.success) errors[`caption_${i}`] = r.error.issues[0].message;
-    });
-  }
-  if (step === 5) collectZodErrors(StepScenariosSchema.safeParse(data.scenarios), errors);
-  if (step === 6) collectZodErrors(StepAvailabilitySchema.safeParse(data.availability), errors);
-  if (step === 7) collectZodErrors(StepAgreementsSchema.safeParse(data.agreements), errors);
-  return errors;
-}
-
-const FIELD_LABELS: Record<string, string> = {
-  fullName:         "Full name",
-  email:            "Email address",
-  location:         "Location",
-  timezone:         "Timezone",
-  areas:            "Experience areas",
-  yearsKnitting:    "Years of knitting experience",
-  projectTypes:     "Project types",
-  helpContext:      "Where you help others",
-  imageCount:       "Sample photos",
-  scenarioOne:      "Scenario response 1",
-  scenarioTwo:      "Scenario response 2",
-  scenarioThree:    "Scenario response 3",
-  availabilityType: "Availability",
-  weeklyHours:      "Weekly hours",
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function buildSubmitError(json: any): string {
-  const issues: { path: (string | number)[]; message: string }[] = json.issues ?? [];
-  if (issues.length === 0) {
-    return json.error ?? "Submission failed. Please try again.";
-  }
-  const fields = [...new Set(
-    issues
-      .map((i) => String(i.path[0] ?? ""))
-      .filter(Boolean)
-      .map((f) => FIELD_LABELS[f] ?? f)
-  )];
-  if (fields.length === 0) {
-    return issues[0].message ?? "Submission failed. Please try again.";
-  }
-  return `Please go back and review: ${fields.join(", ")}.`;
-}
-
 export function ApplicationForm() {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -104,6 +32,7 @@ export function ApplicationForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [reviewEditMode, setReviewEditMode] = useState(false);
 
   async function handleSubmit() {
     setSubmitting(true);
@@ -121,15 +50,14 @@ export function ApplicationForm() {
       const res = await fetch("/api/guides/apply", { method: "POST", body: fd });
       const json = await res.json();
       if (!res.ok) {
-        // Log full details so we can diagnose what the server rejected.
         console.error("[apply] submission failed", {
-          status: res.status,
-          error: json.error,
-          issues: json.issues ?? [],
+          status: res.status, error: json.error, issues: json.issues ?? [],
         });
         setSubmitError(buildSubmitError(json));
       } else {
-        router.push(`/guides/apply/confirmation?id=${json.profileId}&email=${encodeURIComponent(data.identity.email ?? "")}`);
+        router.push(
+          `/guides/apply/confirmation?id=${json.profileId}&email=${encodeURIComponent(data.identity.email ?? "")}`
+        );
       }
     } catch {
       setSubmitError("Something went wrong. Please try again.");
@@ -138,8 +66,6 @@ export function ApplicationForm() {
     }
   }
 
-  // Update data and immediately clear any errors that the new value resolves.
-  // Never adds new errors on change — only removes resolved ones.
   function handleChange(newData: ApplicationFormData) {
     setData(newData);
     setErrors((prev) => {
@@ -157,11 +83,41 @@ export function ApplicationForm() {
     const errs = validateStep(step, data);
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setErrors({});
-    if (step < TOTAL_STEPS) setStep((s) => s + 1);
-    else handleSubmit();
+    if (reviewEditMode) {
+      setReviewEditMode(false);
+      setStep(7);
+    } else if (step < TOTAL_STEPS) {
+      setStep((s) => s + 1);
+    } else {
+      handleSubmit();
+    }
   }
 
-  function handleBack() { setErrors({}); setStep((s) => Math.max(1, s - 1)); }
+  function handleBack() {
+    setErrors({});
+    if (reviewEditMode) {
+      setReviewEditMode(false);
+      setStep(7);
+    } else {
+      setStep((s) => Math.max(1, s - 1));
+    }
+  }
+
+  function handleEdit(targetStep: number) {
+    setErrors({});
+    setReviewEditMode(true);
+    setStep(targetStep);
+  }
+
+  const agreementsValid = StepAgreementsSchema.safeParse(data.agreements).success;
+
+  const reviewStepErrors: Record<number, Record<string, string>> =
+    step === 7
+      ? {
+          1: validateStep(1, data), 2: validateStep(2, data), 3: validateStep(3, data),
+          4: validateStep(4, data), 5: validateStep(5, data), 6: validateStep(6, data),
+        }
+      : {};
 
   return (
     <div className="w-full max-w-xl mx-auto">
@@ -173,7 +129,15 @@ export function ApplicationForm() {
         {step === 4 && <StepSampleWork images={data.sampleWork} onChange={(imgs) => handleChange({ ...data, sampleWork: imgs })} errors={errors} />}
         {step === 5 && <StepScenarioResponses data={data.scenarios} onChange={(d) => handleChange({ ...data, scenarios: d })} errors={errors} />}
         {step === 6 && <StepAvailability data={data.availability} onChange={(d) => handleChange({ ...data, availability: d })} errors={errors} />}
-        {step === 7 && <StepAgreements data={data.agreements} onChange={(d) => handleChange({ ...data, agreements: d })} errors={errors} />}
+        {step === 7 && (
+          <StepReview
+            data={data}
+            agreements={data.agreements}
+            onAgreementsChange={(d) => handleChange({ ...data, agreements: d })}
+            onEdit={handleEdit}
+            stepErrors={reviewStepErrors}
+          />
+        )}
 
         <div className="mt-8 pt-6 border-t border-border space-y-3">
           {submitError && <p className="text-sm text-destructive">{submitError}</p>}
@@ -188,13 +152,21 @@ export function ApplicationForm() {
             </p>
           )}
           <div className="flex justify-between items-center">
-            <button type="button" onClick={handleBack} disabled={step === 1 || submitting}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground disabled:opacity-0 disabled:pointer-events-none transition-colors">
+            <button
+              type="button"
+              onClick={handleBack}
+              disabled={step === 1 || submitting}
+              className="text-sm font-medium text-muted-foreground hover:text-foreground disabled:opacity-0 disabled:pointer-events-none transition-colors"
+            >
               Back
             </button>
-            <button type="button" onClick={handleNext} disabled={submitting}
-              className="px-6 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-75 transition-colors">
-              {submitting ? "Submitting..." : step === TOTAL_STEPS ? "Submit application" : "Continue"}
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={submitting || (step === TOTAL_STEPS && !agreementsValid)}
+              className="px-6 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {submitting ? "Submitting..." : step === TOTAL_STEPS ? "Submit Application" : "Continue"}
             </button>
           </div>
         </div>

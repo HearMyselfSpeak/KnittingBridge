@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { SampleImageData } from "@/lib/guide-application-schema";
+import { PasteBox } from "@/components/ColorPreview/PasteBox";
 
 const SIZE_LIMIT = 5 * 1024 * 1024;
 const ACCEPT = "image/jpeg,image/png,image/webp,image/avif";
@@ -112,27 +113,30 @@ export function StepSampleWork({ images, onChange, errors }: Props) {
       )}
 
       {images.length < MAX_IMAGES && (
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="w-full border-2 border-dashed border-border rounded-lg px-6 py-8 text-center hover:border-primary/40 hover:bg-secondary/40 transition-colors"
-        >
-          <input
-            ref={inputRef}
-            type="file"
-            accept={ACCEPT}
-            className="sr-only"
-            onChange={onInputChange}
-          />
-          <p className="text-sm font-medium text-foreground">
-            {images.length === 0 ? "Add a photo" : "Add another photo"}
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {images.length === 0
-              ? "Upload 1–3 finished project images"
-              : `${MAX_IMAGES - images.length} more allowed`}
-          </p>
-        </button>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="border-2 border-dashed border-border rounded-lg px-4 py-8 text-center hover:border-primary/40 hover:bg-secondary/40 transition-colors"
+          >
+            <input
+              ref={inputRef}
+              type="file"
+              accept={ACCEPT}
+              className="sr-only"
+              onChange={onInputChange}
+            />
+            <p className="text-sm font-medium text-foreground">
+              {images.length === 0 ? "Add a photo" : "Add another photo"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {images.length === 0
+                ? "Choose from your files"
+                : `${MAX_IMAGES - images.length} more allowed`}
+            </p>
+          </button>
+          <PasteBox onFile={handleFile} />
+        </div>
       )}
 
       {(sizeError || errors.images) && (
