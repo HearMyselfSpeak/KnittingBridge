@@ -36,7 +36,7 @@ export default async function ConfirmationPage({ searchParams }: Props) {
           </h1>
           <p className="mt-3 text-base text-muted-foreground">
             Thank you for applying to become a KnittingBridge Guide. Your application is
-            under review — we will be in touch within five business days.
+            under review. We will be in touch within five business days.
           </p>
         </div>
 
