@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Send confirmation email -- non-blocking, never fails the submission
-    const emailDebug: { keyPresent: boolean; emailFrom: string | undefined; error?: string } = {
+    const emailDebug: { keyPresent: boolean; emailFrom: string | undefined; error?: string; sendResult?: unknown } = {
       keyPresent: !!process.env.RESEND_API_KEY,
       emailFrom: process.env.EMAIL_FROM,
     };
@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
         const resend = new Resend(process.env.RESEND_API_KEY);
         const from = process.env.EMAIL_FROM ?? "KnittingBridge <no-reply@knittingbridge.com>";
         const firstName = p.fullName.split(" ")[0];
-        await resend.emails.send({
+        emailDebug.sendResult = await resend.emails.send({
           from,
           to: p.email,
           subject: "We received your Guide application",
