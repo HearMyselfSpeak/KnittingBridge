@@ -126,6 +126,8 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("[guides/apply]", error);
     const message = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: `Submission failed: ${message}` }, { status: 500 });
+    // TEMP DIAGNOSTIC — remove after confirming Vercel env var
+    const keyPrefix = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "").slice(0, 8) || "(unset)";
+    return NextResponse.json({ error: `Submission failed: ${message}`, keyPrefix }, { status: 500 });
   }
 }
