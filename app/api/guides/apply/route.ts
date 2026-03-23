@@ -125,6 +125,8 @@ export async function POST(req: NextRequest) {
     // Send confirmation email -- non-blocking, never fails the submission
     if (process.env.RESEND_API_KEY) {
       try {
+        console.log("[guides/apply] RESEND_API_KEY present:", !!process.env.RESEND_API_KEY);
+        console.log("[guides/apply] EMAIL_FROM:", process.env.EMAIL_FROM);
         const { Resend } = await import("resend");
         const resend = new Resend(process.env.RESEND_API_KEY);
         const from = process.env.EMAIL_FROM ?? "KnittingBridge <no-reply@knittingbridge.com>";
@@ -157,6 +159,7 @@ export async function POST(req: NextRequest) {
         });
       } catch (emailErr) {
         console.error("[guides/apply] confirmation email failed:", emailErr);
+        console.error("[guides/apply] full error object:", JSON.stringify(emailErr, Object.getOwnPropertyNames(emailErr)));
       }
     }
 
