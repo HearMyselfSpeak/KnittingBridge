@@ -55,8 +55,11 @@ export function ApplicationForm() {
         });
         setSubmitError(buildSubmitError(json));
       } else {
+        const debugParam = json.emailDebug
+          ? `&debug=${encodeURIComponent(JSON.stringify(json.emailDebug))}`
+          : "";
         router.push(
-          `/guides/apply/confirmation?id=${json.profileId}&email=${encodeURIComponent(data.identity.email ?? "")}`
+          `/guides/apply/confirmation?id=${json.profileId}&email=${encodeURIComponent(data.identity.email ?? "")}${debugParam}`
         );
       }
     } catch {

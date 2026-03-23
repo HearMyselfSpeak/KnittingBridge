@@ -123,6 +123,10 @@ export async function POST(req: NextRequest) {
     });
 
     // Send confirmation email -- non-blocking, never fails the submission
+    const emailDebug: { keyPresent: boolean; emailFrom: string | undefined; error?: string } = {
+      keyPresent: !!process.env.RESEND_API_KEY,
+      emailFrom: process.env.EMAIL_FROM,
+    };
     if (process.env.RESEND_API_KEY) {
       try {
         console.log("[guides/apply] RESEND_API_KEY present:", !!process.env.RESEND_API_KEY);
@@ -158,12 +162,13 @@ export async function POST(req: NextRequest) {
 </html>`,
         });
       } catch (emailErr) {
+        emailDebug.error = emailErr instanceof Error ? emailErr.message : String(emailErr);
         console.error("[guides/apply] confirmation email failed:", emailErr);
         console.error("[guides/apply] full error object:", JSON.stringify(emailErr, Object.getOwnPropertyNames(emailErr)));
       }
     }
 
-    return NextResponse.json({ profileId: profile.id, status: "PENDING" });
+    return NextResponse.json({ profileId: profile.id, status: "PENDING", emailDebug });
   } catch (error) {
     console.error("[guides/apply]", error);
     const message = error instanceof Error ? error.message : String(error);
