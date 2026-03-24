@@ -147,6 +147,7 @@ export async function POST(req: NextRequest) {
           <p style="margin:0 0 16px;font-size:16px;line-height:1.6">Hi ${firstName},</p>
           <p style="margin:0 0 16px;font-size:16px;line-height:1.6">We received your application to become a KnittingBridge Guide. Thank you for taking the time to share your experience with us.</p>
           <p style="margin:0 0 16px;font-size:16px;line-height:1.6">Our team will review your application and get back to you within 24 hours.</p>
+          <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#6b7280;font-family:monospace">Application ID: ${profile.id}</p>
           <p style="margin:0;font-size:16px;line-height:1.6">The KnittingBridge Team</p>
         </td></tr>
       </table>
