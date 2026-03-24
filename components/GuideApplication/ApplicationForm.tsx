@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ProgressBar } from "./ProgressBar";
 import { StepIdentity } from "./StepIdentity";
@@ -26,13 +26,15 @@ const EMPTY: ApplicationFormData = {
   agreements:         {},
 };
 
+function stepFromUrl() {
+  const s = parseInt(new URLSearchParams(window.location.search).get("step") ?? "1", 10);
+  return s >= 1 && s <= TOTAL_STEPS ? s : 1;
+}
+
 function loadFromSession(): ApplicationFormData {
   try {
     const saved = sessionStorage.getItem(SESSION_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      return { ...EMPTY, ...parsed, sampleWork: [], agreements: {} };
-    }
+    if (saved) return { ...EMPTY, ...JSON.parse(saved), sampleWork: [], agreements: {} };
   } catch { /* ignore */ }
   return EMPTY;
 }
@@ -44,9 +46,7 @@ function saveToSession(d: ApplicationFormData) {
   } catch { /* ignore */ }
 }
 
-function clearSession() {
-  try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
-}
+const clearSession = () => { try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ } };
 
 export function ApplicationForm() {
   const router = useRouter();
@@ -56,6 +56,17 @@ export function ApplicationForm() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [reviewEditMode, setReviewEditMode] = useState(false);
+
+  const navStep = (s: number) => { window.history.pushState({ step: s }, "", `?step=${s}`); setStep(s); };
+
+  useEffect(() => {
+    const s = stepFromUrl();
+    setStep(s);
+    window.history.replaceState({ step: s }, "", `?step=${s}`);
+    const onPop = () => { setStep(stepFromUrl()); setReviewEditMode(false); setErrors({}); };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   async function handleSubmit() {
     setSubmitting(true);
@@ -108,41 +119,28 @@ export function ApplicationForm() {
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setErrors({});
     saveToSession(data);
-    if (reviewEditMode) {
-      setReviewEditMode(false);
-      setStep(7);
-    } else if (step < TOTAL_STEPS) {
-      setStep((s) => s + 1);
-    } else {
-      handleSubmit();
-    }
+    if (reviewEditMode) { setReviewEditMode(false); navStep(7); }
+    else if (step < TOTAL_STEPS) { navStep(step + 1); }
+    else { handleSubmit(); }
   }
 
   function handleBack() {
     setErrors({});
-    if (reviewEditMode) {
-      setReviewEditMode(false);
-      setStep(7);
-    } else {
-      setStep((s) => Math.max(1, s - 1));
-    }
+    if (reviewEditMode) { setReviewEditMode(false); navStep(7); }
+    else { window.history.back(); }
   }
 
   function handleEdit(targetStep: number) {
     setErrors({});
     setReviewEditMode(true);
-    setStep(targetStep);
+    navStep(targetStep);
   }
 
   const agreementsValid = StepAgreementsSchema.safeParse(data.agreements).success;
 
-  const reviewStepErrors: Record<number, Record<string, string>> =
-    step === 7
-      ? {
-          1: validateStep(1, data), 2: validateStep(2, data), 3: validateStep(3, data),
-          4: validateStep(4, data), 5: validateStep(5, data), 6: validateStep(6, data),
-        }
-      : {};
+  const reviewStepErrors: Record<number, Record<string, string>> = step === 7
+    ? { 1: validateStep(1, data), 2: validateStep(2, data), 3: validateStep(3, data), 4: validateStep(4, data), 5: validateStep(5, data), 6: validateStep(6, data) }
+    : {};
 
   return (
     <div className="w-full max-w-xl mx-auto">
