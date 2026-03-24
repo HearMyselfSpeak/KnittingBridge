@@ -123,19 +123,13 @@ export async function POST(req: NextRequest) {
     });
 
     // Send confirmation email -- non-blocking, never fails the submission
-    const emailDebug: { keyPresent: boolean; emailFrom: string | undefined; error?: string; sendResult?: unknown } = {
-      keyPresent: !!process.env.RESEND_API_KEY,
-      emailFrom: process.env.EMAIL_FROM,
-    };
     if (process.env.RESEND_API_KEY) {
       try {
-        console.log("[guides/apply] RESEND_API_KEY present:", !!process.env.RESEND_API_KEY);
-        console.log("[guides/apply] EMAIL_FROM:", process.env.EMAIL_FROM);
         const { Resend } = await import("resend");
         const resend = new Resend(process.env.RESEND_API_KEY);
         const from = process.env.EMAIL_FROM ?? "KnittingBridge <no-reply@knittingbridge.com>";
         const firstName = p.fullName.split(" ")[0];
-        emailDebug.sendResult = await resend.emails.send({
+        await resend.emails.send({
           from,
           to: p.email,
           subject: "We received your Guide application",
@@ -162,13 +156,11 @@ export async function POST(req: NextRequest) {
 </html>`,
         });
       } catch (emailErr) {
-        emailDebug.error = emailErr instanceof Error ? emailErr.message : String(emailErr);
         console.error("[guides/apply] confirmation email failed:", emailErr);
-        console.error("[guides/apply] full error object:", JSON.stringify(emailErr, Object.getOwnPropertyNames(emailErr)));
       }
     }
 
-    return NextResponse.json({ profileId: profile.id, status: "PENDING", emailDebug });
+    return NextResponse.json({ profileId: profile.id, status: "PENDING" });
   } catch (error) {
     console.error("[guides/apply]", error);
     const message = error instanceof Error ? error.message : String(error);

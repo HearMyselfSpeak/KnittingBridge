@@ -5,22 +5,12 @@ export const metadata: Metadata = {
   title: "Application submitted — KnittingBridge",
 };
 
-interface EmailDebug {
-  keyPresent: boolean;
-  emailFrom: string | undefined;
-  error?: string;
-}
-
 interface Props {
-  searchParams: Promise<{ id?: string; email?: string; debug?: string }>;
+  searchParams: Promise<{ id?: string; email?: string }>;
 }
 
 export default async function ConfirmationPage({ searchParams }: Props) {
-  const { id, email, debug } = await searchParams;
-  let emailDebug: EmailDebug | null = null;
-  if (debug) {
-    try { emailDebug = JSON.parse(decodeURIComponent(debug)); } catch { /* ignore */ }
-  }
+  const { id, email } = await searchParams;
 
   return (
     <main className="min-h-screen bg-background px-4 py-16 flex items-start justify-center">
@@ -70,16 +60,6 @@ export default async function ConfirmationPage({ searchParams }: Props) {
           </Link>
         </div>
 
-        {emailDebug && (
-          <div className="mt-6 text-left border border-border rounded-md p-4 bg-secondary/40">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-              Email debug
-            </p>
-            <pre className="text-xs text-foreground whitespace-pre-wrap break-all font-mono">
-              {JSON.stringify(emailDebug, null, 2)}
-            </pre>
-          </div>
-        )}
       </div>
     </main>
   );
