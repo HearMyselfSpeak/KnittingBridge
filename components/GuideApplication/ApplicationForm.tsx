@@ -14,6 +14,7 @@ import { StepAgreementsSchema, type ApplicationFormData } from "@/lib/guide-appl
 import { validateStep, buildSubmitError } from "@/lib/guide-application-validate";
 
 const TOTAL_STEPS = 7;
+const SESSION_KEY = "kb_guide_application";
 
 const EMPTY: ApplicationFormData = {
   identity:           {},
@@ -25,10 +26,32 @@ const EMPTY: ApplicationFormData = {
   agreements:         {},
 };
 
+function loadFromSession(): ApplicationFormData {
+  try {
+    const saved = sessionStorage.getItem(SESSION_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return { ...EMPTY, ...parsed, sampleWork: [], agreements: {} };
+    }
+  } catch { /* ignore */ }
+  return EMPTY;
+}
+
+function saveToSession(d: ApplicationFormData) {
+  try {
+    const { sampleWork: _s, agreements: _a, ...serializable } = d;
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(serializable));
+  } catch { /* ignore */ }
+}
+
+function clearSession() {
+  try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
+}
+
 export function ApplicationForm() {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [data, setData] = useState<ApplicationFormData>(EMPTY);
+  const [data, setData] = useState<ApplicationFormData>(loadFromSession);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -55,6 +78,7 @@ export function ApplicationForm() {
         });
         setSubmitError(buildSubmitError(json));
       } else {
+        clearSession();
         router.push(
           `/guides/apply/confirmation?id=${json.profileId}&email=${encodeURIComponent(data.identity.email ?? "")}`
         );
@@ -83,6 +107,7 @@ export function ApplicationForm() {
     const errs = validateStep(step, data);
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setErrors({});
+    saveToSession(data);
     if (reviewEditMode) {
       setReviewEditMode(false);
       setStep(7);
