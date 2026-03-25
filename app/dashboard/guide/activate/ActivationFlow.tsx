@@ -25,21 +25,21 @@ function stepFromUrl(): number {
   return s >= 1 && s <= 5 ? s : 1;
 }
 
+function readCompReviewed(): boolean {
+  try {
+    return (
+      typeof window !== "undefined" &&
+      sessionStorage.getItem("kb_activation_step2") === "reviewed"
+    );
+  } catch {
+    return false;
+  }
+}
+
 export default function ActivationFlow({ initialState }: ActivationFlowProps) {
   const [state, setState] = useState(initialState);
   const [currentStep, setCurrentStep] = useState(1);
-  const [compReviewed, setCompReviewed] = useState(false);
-
-  // Check sessionStorage once on mount for Step 2 completion.
-  useEffect(() => {
-    try {
-      if (sessionStorage.getItem("kb_activation_step2") === "reviewed") {
-        setCompReviewed(true);
-      }
-    } catch {
-      // Ignore storage errors.
-    }
-  }, []);
+  const [compReviewed, setCompReviewed] = useState(readCompReviewed);
 
   // Derive which steps are completed from the profile state.
   const completedSteps = [
