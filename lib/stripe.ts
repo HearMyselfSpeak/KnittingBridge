@@ -48,22 +48,32 @@ export async function createAccountLink(
   return link.url;
 }
 
-// Check whether a Connect account has completed onboarding.
+// Check whether a Connect account has completed onboarding and is fully operational.
+// Both charges_enabled and payouts_enabled must be true before routing sessions to this Guide.
 export async function isAccountOnboarded(accountId: string): Promise<boolean> {
   const account = await stripe.accounts.retrieve(accountId);
-  return account.details_submitted === true;
+  return account.charges_enabled === true && account.payouts_enabled === true;
 }
 
-// Create a PaymentIntent for a session. Amount is in cents.
+// Create a PaymentIntent for a session using destination charges.
+// Funds flow to the Guide's Connect account; the platform retains application_fee_amount.
+// platformFeePercent: 0–1 (e.g. 0.25 = 25%). amountCents is the total charge in cents.
 export async function createPaymentIntent(
   amountCents: number,
+  guideStripeAccountId: string,
+  platformFeePercent: number,
   currency: string = "usd",
   metadata: Record<string, string> = {}
 ): Promise<Stripe.PaymentIntent> {
+  const applicationFee = Math.floor(amountCents * platformFeePercent);
   return stripe.paymentIntents.create({
     amount: amountCents,
     currency,
     capture_method: "manual",
+    application_fee_amount: applicationFee,
+    transfer_data: {
+      destination: guideStripeAccountId,
+    },
     metadata,
   });
 }
@@ -73,22 +83,6 @@ export async function capturePaymentIntent(
   paymentIntentId: string
 ): Promise<Stripe.PaymentIntent> {
   return stripe.paymentIntents.capture(paymentIntentId);
-}
-
-// Transfer Guide earnings (75%) to their Connect account after session ends.
-// amount is the total session amount in cents.
-export async function transferGuideEarnings(
-  amountCents: number,
-  stripeAccountId: string,
-  metadata: Record<string, string> = {}
-): Promise<Stripe.Transfer> {
-  const guideEarnings = Math.floor(amountCents * 0.75);
-  return stripe.transfers.create({
-    amount: guideEarnings,
-    currency: "usd",
-    destination: stripeAccountId,
-    metadata,
-  });
 }
 
 // Refund a PaymentIntent.
