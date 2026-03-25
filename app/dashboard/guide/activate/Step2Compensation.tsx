@@ -53,25 +53,17 @@ export default function Step2Compensation({
     onComplete();
   }
 
-  if (reviewed) {
-    return (
-      <div className="space-y-4">
-        <p className="text-sm text-muted-foreground">
-          You have reviewed the compensation structure. This step is complete.
-        </p>
-        <button
-          onClick={onComplete}
-          className="px-6 py-2 bg-primary text-white rounded-md text-sm
-                     hover:bg-primary/90 transition-colors"
-        >
-          Continue
-        </button>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8 text-sm leading-relaxed">
+      {reviewed && (
+        <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-3">
+          <span className="text-green-700 text-lg">&#10003;</span>
+          <p className="text-sm text-green-800 font-medium">
+            You have reviewed the compensation structure.
+          </p>
+        </div>
+      )}
+
       {/* Earnings split */}
       <section>
         <h2
@@ -159,13 +151,13 @@ export default function Step2Compensation({
         </p>
       </section>
 
-      {/* Acknowledge */}
+      {/* Acknowledge / Continue */}
       <button
-        onClick={handleAcknowledge}
+        onClick={reviewed ? onComplete : handleAcknowledge}
         className="px-6 py-2 bg-primary text-white rounded-md text-sm
                    hover:bg-primary/90 transition-colors"
       >
-        I understand, continue
+        {reviewed ? "Continue" : "I understand, continue"}
       </button>
     </div>
   );

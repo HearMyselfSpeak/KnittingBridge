@@ -19,11 +19,22 @@ export default function Step1Agreement({
 
   if (alreadyAccepted) {
     return (
-      <div className="space-y-4">
-        <p className="text-sm text-muted-foreground">
-          You accepted the Independent Contractor Agreement. This step is
-          complete.
-        </p>
+      <div className="space-y-8">
+        <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-3">
+          <span className="text-green-700 text-lg">&#10003;</span>
+          <p className="text-sm text-green-800 font-medium">
+            You accepted the Independent Contractor Agreement.
+          </p>
+        </div>
+
+        <div
+          className="max-h-[60vh] overflow-y-auto border border-border rounded-md
+                      p-6 space-y-10 text-sm text-muted-foreground leading-relaxed"
+        >
+          <GuideAgreementPart1 />
+          <GuideAgreementPart2 />
+        </div>
+
         <button
           onClick={onComplete}
           className="px-6 py-2 bg-primary text-white rounded-md text-sm
