@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import ActivationStepper from "./ActivationStepper";
 import Step1Agreement from "./Step1Agreement";
+import Step2Compensation from "./Step2Compensation";
 
 interface GuideActivationState {
   icAgreementAccepted: boolean;
@@ -25,11 +26,23 @@ function stepFromUrl(): number {
 export default function ActivationFlow({ initialState }: ActivationFlowProps) {
   const [state, setState] = useState(initialState);
   const [currentStep, setCurrentStep] = useState(1);
+  const [compReviewed, setCompReviewed] = useState(false);
+
+  // Check sessionStorage once on mount for Step 2 completion.
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem("kb_activation_step2") === "reviewed") {
+        setCompReviewed(true);
+      }
+    } catch {
+      // Ignore storage errors.
+    }
+  }, []);
 
   // Derive which steps are completed from the profile state.
   const completedSteps = [
     state.icAgreementAccepted,
-    false, // Step 2: compensation review (no DB field, tracked in sessionStorage)
+    compReviewed,
     state.stripeOnboarded,
     state.availableDays != null,
     state.activationComplete,
@@ -70,6 +83,11 @@ export default function ActivationFlow({ initialState }: ActivationFlowProps) {
     navStep(2);
   }
 
+  function handleStep2Complete() {
+    setCompReviewed(true);
+    navStep(3);
+  }
+
   return (
     <div>
       <ActivationStepper
@@ -85,9 +103,10 @@ export default function ActivationFlow({ initialState }: ActivationFlowProps) {
       )}
 
       {currentStep === 2 && (
-        <div className="text-sm text-muted-foreground">
-          Step 2: Compensation Review (coming soon)
-        </div>
+        <Step2Compensation
+          alreadyReviewed={compReviewed}
+          onComplete={handleStep2Complete}
+        />
       )}
 
       {currentStep === 3 && (
