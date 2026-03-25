@@ -4,9 +4,11 @@ import { useEffect, useState, useCallback } from "react";
 import ActivationStepper from "./ActivationStepper";
 import Step1Agreement from "./Step1Agreement";
 import Step2Compensation from "./Step2Compensation";
+import Step3Stripe from "./Step3Stripe";
 
 interface GuideActivationState {
   icAgreementAccepted: boolean;
+  hasStripeAccount: boolean;
   stripeOnboarded: boolean;
   availableDays: unknown;
   activationComplete: boolean;
@@ -88,6 +90,11 @@ export default function ActivationFlow({ initialState }: ActivationFlowProps) {
     navStep(3);
   }
 
+  function handleStep3Complete() {
+    setState((prev) => ({ ...prev, stripeOnboarded: true }));
+    navStep(4);
+  }
+
   return (
     <div>
       <ActivationStepper
@@ -110,9 +117,11 @@ export default function ActivationFlow({ initialState }: ActivationFlowProps) {
       )}
 
       {currentStep === 3 && (
-        <div className="text-sm text-muted-foreground">
-          Step 3: Connect Stripe (coming soon)
-        </div>
+        <Step3Stripe
+          hasAccount={state.hasStripeAccount}
+          alreadyOnboarded={state.stripeOnboarded}
+          onComplete={handleStep3Complete}
+        />
       )}
 
       {currentStep === 4 && (

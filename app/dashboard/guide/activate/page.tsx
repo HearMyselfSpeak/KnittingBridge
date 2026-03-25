@@ -21,6 +21,7 @@ export default async function GuideActivatePage() {
     select: {
       status: true,
       icAgreementAccepted: true,
+      stripeAccountId: true,
       stripeOnboarded: true,
       availableDays: true,
       activationComplete: true,
@@ -53,6 +54,7 @@ export default async function GuideActivatePage() {
       <ActivationFlow
         initialState={{
           icAgreementAccepted: profile.icAgreementAccepted,
+          hasStripeAccount: profile.stripeAccountId != null,
           stripeOnboarded: profile.stripeOnboarded,
           availableDays: profile.availableDays,
           activationComplete: profile.activationComplete,
