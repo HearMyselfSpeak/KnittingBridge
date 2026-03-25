@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Stripe Connect error:", error);
     return NextResponse.json(
-      { error: "Failed to start Stripe onboarding" },
+      { error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
