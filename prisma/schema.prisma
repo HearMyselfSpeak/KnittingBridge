@@ -201,6 +201,21 @@ model GuideProfile {
   location          String?
   timezone          String?
 
+  // Independent contractor agreement
+  icAgreementAccepted   Boolean   @default(false)
+  icAgreementAcceptedAt DateTime?
+
+  // Activation
+  activationComplete Boolean @default(false)
+
+  // Payments — per-Guide fee override (null = use platform default)
+  platformFeeOverride Float?
+
+  // Scheduling
+  availableDays     Json?
+  timeBlocks        Json?
+  maxSessionMinutes Int?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -338,6 +353,13 @@ model Payment {
   status          String
   metadata        Json?
   createdAt       DateTime @default(now())
+}
+
+model PlatformConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
 }
 
 // ─── Color Preview Tool Models ───────────────────────────────────────────────
