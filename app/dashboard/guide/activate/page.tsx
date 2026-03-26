@@ -21,6 +21,7 @@ export default async function GuideActivatePage() {
     select: {
       status: true,
       icAgreementAccepted: true,
+      icAgreementAcceptedAt: true,
       stripeAccountId: true,
       stripeOnboarded: true,
       timezone: true,
@@ -56,6 +57,7 @@ export default async function GuideActivatePage() {
       <ActivationFlow
         initialState={{
           icAgreementAccepted: profile.icAgreementAccepted,
+          icAgreementAcceptedAt: profile.icAgreementAcceptedAt?.toISOString() ?? null,
           hasStripeAccount: profile.stripeAccountId != null,
           stripeOnboarded: profile.stripeOnboarded,
           timezone: profile.timezone,

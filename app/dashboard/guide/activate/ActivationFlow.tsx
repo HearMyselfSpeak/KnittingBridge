@@ -6,9 +6,11 @@ import Step1Agreement from "./Step1Agreement";
 import Step2Compensation from "./Step2Compensation";
 import Step3Stripe from "./Step3Stripe";
 import Step4Availability from "./Step4Availability";
+import Step5Confirm from "./Step5Confirm";
 
 interface GuideActivationState {
   icAgreementAccepted: boolean;
+  icAgreementAcceptedAt: string | null;
   hasStripeAccount: boolean;
   stripeOnboarded: boolean;
   timezone: string | null;
@@ -150,9 +152,11 @@ export default function ActivationFlow({ initialState }: ActivationFlowProps) {
       )}
 
       {currentStep === 5 && (
-        <div className="text-sm text-muted-foreground">
-          Step 5: Confirm Profile (coming soon)
-        </div>
+        <Step5Confirm
+          agreementDate={state.icAgreementAcceptedAt}
+          availableDays={state.availableDays}
+          timeBlocks={state.timeBlocks}
+        />
       )}
     </div>
   );
