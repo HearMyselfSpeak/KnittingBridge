@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
+import { Prisma } from "@/lib/generated/prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -14,24 +15,15 @@ const VALID_DAYS = [
   "Sunday",
 ] as const;
 
-const VALID_BLOCKS = ["morning", "afternoon", "evening"] as const;
-
-const VALID_MINUTES = [20, 30, 45, 60] as const;
-
+// Scheduled mode: days + hourly grid. Impulse mode: empty days, null blocks.
 const availabilitySchema = z.object({
-  availableDays: z
-    .array(z.enum(VALID_DAYS, { error: "Invalid day selected" }), {
-      error: "Please select at least one day",
-    })
-    .min(1, "Please select at least one day"),
-  timeBlocks: z.record(
-    z.string(),
-    z.array(z.enum(VALID_BLOCKS, { error: "Invalid time block" }))
+  timezone: z.string({ error: "Please select a timezone" }).min(1, "Please select a timezone"),
+  availableDays: z.array(
+    z.enum(VALID_DAYS, { error: "Invalid day selected" })
   ),
-  maxSessionMinutes: z.enum(
-    VALID_MINUTES.map(String) as [string, ...string[]],
-    { error: "Please select a valid session length" }
-  ).transform(Number),
+  timeBlocks: z
+    .record(z.string(), z.array(z.number().int().min(0).max(23)))
+    .nullable(),
 });
 
 export async function POST(req: Request) {
@@ -49,17 +41,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: firstError }, { status: 400 });
     }
 
-    const { availableDays, timeBlocks, maxSessionMinutes } = parsed.data;
+    const { timezone, availableDays, timeBlocks } = parsed.data;
 
-    // Validate that at least one selected day has a time block.
-    const hasBlock = availableDays.some(
-      (d) => (timeBlocks[d] ?? []).length > 0
-    );
-    if (!hasBlock) {
-      return NextResponse.json(
-        { error: "Please select at least one time block for your available days" },
-        { status: 400 }
+    // Scheduled mode: must have at least one hour selected.
+    if (availableDays.length > 0) {
+      const hasHour = availableDays.some(
+        (d) => (timeBlocks?.[d] ?? []).length > 0
       );
+      if (!hasHour) {
+        return NextResponse.json(
+          { error: "Please select at least one available hour" },
+          { status: 400 }
+        );
+      }
     }
 
     const { prisma } = await import("@/lib/prisma");
@@ -79,9 +73,10 @@ export async function POST(req: Request) {
     await prisma.guideProfile.update({
       where: { id: profile.id },
       data: {
+        timezone,
         availableDays: availableDays,
-        timeBlocks: timeBlocks,
-        maxSessionMinutes: maxSessionMinutes,
+        timeBlocks: timeBlocks ?? Prisma.DbNull,
+        maxSessionMinutes: null,
       },
     });
 

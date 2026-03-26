@@ -1,78 +1,88 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import DayBlockRow, {
-  DAYS,
-  SESSION_LENGTHS,
-  filterBlocks,
-  type DayName,
-  type BlockId,
-} from "./DayBlockRow";
+import WeeklyGrid, { DAYS, type DayName } from "./WeeklyGrid";
+import { TimezoneSelect, ModeSelector } from "./AvailabilityControls";
+
+type Mode = "scheduled" | "impulse" | null;
 
 interface Step4AvailabilityProps {
   alreadySaved: boolean;
+  initialTimezone: string | null;
   initialDays: string[] | null;
-  initialBlocks: Record<string, string[]> | null;
-  initialMaxMinutes: number | null;
+  initialBlocks: Record<string, number[]> | null;
   onComplete: () => void;
+}
+
+function detectTimezone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    return "America/New_York";
+  }
+}
+
+function deriveInitialMode(days: string[] | null): Mode {
+  if (days === null) return null;
+  return days.length === 0 ? "impulse" : "scheduled";
 }
 
 export default function Step4Availability({
   alreadySaved,
+  initialTimezone,
   initialDays,
   initialBlocks,
-  initialMaxMinutes,
   onComplete,
 }: Step4AvailabilityProps) {
-  const [selectedDays, setSelectedDays] = useState<DayName[]>(
-    (initialDays ?? []).filter((d): d is DayName =>
-      DAYS.includes(d as DayName)
-    )
+  const [timezone, setTimezone] = useState(
+    initialTimezone || detectTimezone()
   );
-  const [blocks, setBlocks] = useState<Record<string, BlockId[]>>(
-    filterBlocks(initialBlocks)
-  );
-  const [maxMinutes, setMaxMinutes] = useState<number>(
-    initialMaxMinutes ?? 30
+  const [mode, setMode] = useState<Mode>(deriveInitialMode(initialDays));
+  const [grid, setGrid] = useState<Record<string, number[]>>(
+    (initialBlocks as Record<string, number[]>) ?? {}
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(alreadySaved);
 
-  function toggleDay(day: DayName) {
-    setSelectedDays((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
-    );
-  }
-
-  function toggleBlock(day: DayName, blockId: BlockId) {
-    setBlocks((prev) => {
+  function toggleHour(day: DayName, hour: number) {
+    setGrid((prev) => {
       const current = prev[day] ?? [];
-      const next = current.includes(blockId)
-        ? current.filter((b) => b !== blockId)
-        : [...current, blockId];
+      const next = current.includes(hour)
+        ? current.filter((h) => h !== hour)
+        : [...current, hour].sort((a, b) => a - b);
       return { ...prev, [day]: next };
     });
   }
 
+  function hasAnyHour() {
+    return DAYS.some((d) => (grid[d] ?? []).length > 0);
+  }
+
   function canSubmit() {
-    if (selectedDays.length === 0) return false;
-    return selectedDays.some((d) => (blocks[d] ?? []).length > 0);
+    if (!mode) return false;
+    if (mode === "impulse") return true;
+    return hasAnyHour();
   }
 
   async function handleSave() {
     setSubmitting(true);
     setError(null);
 
+    const payload =
+      mode === "scheduled"
+        ? {
+            timezone,
+            availableDays: DAYS.filter((d) => (grid[d] ?? []).length > 0),
+            timeBlocks: grid,
+          }
+        : { timezone, availableDays: [], timeBlocks: null };
+
     try {
       const res = await fetch("/api/guides/activate/availability", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          availableDays: selectedDays,
-          timeBlocks: blocks,
-          maxSessionMinutes: maxMinutes,
-        }),
+        body: JSON.stringify(payload),
       });
       const json = await res.json();
 
@@ -93,70 +103,36 @@ export default function Step4Availability({
   return (
     <div className="space-y-8 text-sm leading-relaxed">
       {saved && (
-        <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-3">
-          <span className="text-green-700 text-lg">&#10003;</span>
-          <p className="text-sm text-green-800 font-medium">
-            Your availability has been saved. You can update it below.
-          </p>
-        </div>
+        <CompleteBanner>
+          Your availability has been saved. You can update it below.
+        </CompleteBanner>
       )}
 
-      <section>
-        <SectionHeading>Available days</SectionHeading>
-        <p className="text-muted-foreground mb-4">
-          Select the days you are generally available for sessions.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {DAYS.map((day) => (
-            <button
-              key={day}
-              onClick={() => toggleDay(day)}
-              className={`px-4 py-2 rounded-md border text-sm transition-colors ${
-                selectedDays.includes(day)
-                  ? "bg-primary text-white border-primary"
-                  : "bg-background text-foreground border-border hover:border-primary/40"
-              }`}
-            >
-              {day}
-            </button>
-          ))}
-        </div>
-      </section>
+      <p className="text-muted-foreground">
+        How do you want to receive session requests? There is no minimum
+        commitment. You can change this anytime, and you can always go online
+        for spontaneous sessions regardless of your schedule.
+      </p>
 
-      {selectedDays.length > 0 && (
+      <TimezoneSelect value={timezone} onChange={setTimezone} />
+      <ModeSelector mode={mode} onChange={setMode} />
+
+      {mode === "scheduled" && (
         <section>
-          <SectionHeading>Time blocks</SectionHeading>
           <p className="text-muted-foreground mb-4">
-            For each day, select when you are available.
+            Tap cells to mark when you are available. Each cell is one hour.
           </p>
-          <div className="space-y-4">
-            {DAYS.filter((d) => selectedDays.includes(d)).map((day) => (
-              <DayBlockRow
-                key={day}
-                day={day}
-                selected={blocks[day] ?? []}
-                onToggle={(blockId) => toggleBlock(day, blockId)}
-              />
-            ))}
-          </div>
+          <WeeklyGrid selected={grid} onToggle={toggleHour} />
         </section>
       )}
 
-      <section>
-        <SectionHeading>Maximum session length</SectionHeading>
-        <select
-          value={maxMinutes}
-          onChange={(e) => setMaxMinutes(Number(e.target.value))}
-          className="border border-border rounded-md px-3 py-2 text-sm
-                     bg-background text-foreground"
-        >
-          {SESSION_LENGTHS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      </section>
+      {mode === "impulse" && (
+        <div className="rounded-md border border-border bg-muted/30 p-4 text-muted-foreground">
+          When you are ready for sessions, use the online toggle from your
+          Guide dashboard. You will only receive requests while your status
+          is set to online.
+        </div>
+      )}
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
@@ -188,13 +164,11 @@ export default function Step4Availability({
   );
 }
 
-function SectionHeading({ children }: { children: ReactNode }) {
+function CompleteBanner({ children }: { children: ReactNode }) {
   return (
-    <h2
-      className="text-lg font-semibold text-primary mb-3"
-      style={{ fontFamily: "var(--font-serif)" }}
-    >
-      {children}
-    </h2>
+    <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-3">
+      <span className="text-green-700 text-lg">&#10003;</span>
+      <p className="text-sm text-green-800 font-medium">{children}</p>
+    </div>
   );
 }

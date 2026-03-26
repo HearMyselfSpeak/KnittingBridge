@@ -11,9 +11,9 @@ interface GuideActivationState {
   icAgreementAccepted: boolean;
   hasStripeAccount: boolean;
   stripeOnboarded: boolean;
+  timezone: string | null;
   availableDays: string[] | null;
-  timeBlocks: Record<string, string[]> | null;
-  maxSessionMinutes: number | null;
+  timeBlocks: Record<string, number[]> | null;
   activationComplete: boolean;
 }
 
@@ -142,9 +142,9 @@ export default function ActivationFlow({ initialState }: ActivationFlowProps) {
       {currentStep === 4 && (
         <Step4Availability
           alreadySaved={state.availableDays != null}
+          initialTimezone={state.timezone}
           initialDays={state.availableDays}
           initialBlocks={state.timeBlocks}
-          initialMaxMinutes={state.maxSessionMinutes}
           onComplete={handleStep4Complete}
         />
       )}
