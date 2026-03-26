@@ -24,6 +24,8 @@ export default async function GuideActivatePage() {
       stripeAccountId: true,
       stripeOnboarded: true,
       availableDays: true,
+      timeBlocks: true,
+      maxSessionMinutes: true,
       activationComplete: true,
     },
   });
@@ -56,7 +58,9 @@ export default async function GuideActivatePage() {
           icAgreementAccepted: profile.icAgreementAccepted,
           hasStripeAccount: profile.stripeAccountId != null,
           stripeOnboarded: profile.stripeOnboarded,
-          availableDays: profile.availableDays,
+          availableDays: profile.availableDays as string[] | null,
+          timeBlocks: profile.timeBlocks as Record<string, string[]> | null,
+          maxSessionMinutes: profile.maxSessionMinutes,
           activationComplete: profile.activationComplete,
         }}
       />

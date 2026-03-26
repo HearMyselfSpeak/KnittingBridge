@@ -5,12 +5,15 @@ import ActivationStepper from "./ActivationStepper";
 import Step1Agreement from "./Step1Agreement";
 import Step2Compensation from "./Step2Compensation";
 import Step3Stripe from "./Step3Stripe";
+import Step4Availability from "./Step4Availability";
 
 interface GuideActivationState {
   icAgreementAccepted: boolean;
   hasStripeAccount: boolean;
   stripeOnboarded: boolean;
-  availableDays: unknown;
+  availableDays: string[] | null;
+  timeBlocks: Record<string, string[]> | null;
+  maxSessionMinutes: number | null;
   activationComplete: boolean;
 }
 
@@ -95,6 +98,11 @@ export default function ActivationFlow({ initialState }: ActivationFlowProps) {
     navStep(4);
   }
 
+  function handleStep4Complete() {
+    setState((prev) => ({ ...prev, availableDays: prev.availableDays ?? [] }));
+    navStep(5);
+  }
+
   return (
     <div>
       <ActivationStepper
@@ -125,9 +133,13 @@ export default function ActivationFlow({ initialState }: ActivationFlowProps) {
       )}
 
       {currentStep === 4 && (
-        <div className="text-sm text-muted-foreground">
-          Step 4: Set Availability (coming soon)
-        </div>
+        <Step4Availability
+          alreadySaved={state.availableDays != null}
+          initialDays={state.availableDays}
+          initialBlocks={state.timeBlocks}
+          initialMaxMinutes={state.maxSessionMinutes}
+          onComplete={handleStep4Complete}
+        />
       )}
 
       {currentStep === 5 && (
