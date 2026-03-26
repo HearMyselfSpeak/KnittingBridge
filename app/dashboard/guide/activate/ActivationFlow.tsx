@@ -83,24 +83,31 @@ export default function ActivationFlow({ initialState }: ActivationFlowProps) {
     return () => window.removeEventListener("popstate", onPopState);
   }, [firstIncomplete]);
 
+  // Navigate directly by setting step and pushing URL, bypassing the
+  // stale firstIncomplete in the memoized navStep callback.
+  function advanceTo(step: number) {
+    setCurrentStep(step);
+    window.history.pushState(null, "", `?step=${step}`);
+  }
+
   function handleStep1Complete() {
     setState((prev) => ({ ...prev, icAgreementAccepted: true }));
-    navStep(2);
+    advanceTo(2);
   }
 
   function handleStep2Complete() {
     setCompReviewed(true);
-    navStep(3);
+    advanceTo(3);
   }
 
   function handleStep3Complete() {
     setState((prev) => ({ ...prev, stripeOnboarded: true }));
-    navStep(4);
+    advanceTo(4);
   }
 
   function handleStep4Complete() {
     setState((prev) => ({ ...prev, availableDays: prev.availableDays ?? [] }));
-    navStep(5);
+    advanceTo(5);
   }
 
   return (
