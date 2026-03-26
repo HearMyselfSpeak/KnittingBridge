@@ -57,7 +57,7 @@ export default function Step5Confirm({
         return;
       }
 
-      router.push("/dashboard/guide");
+      router.push("/dashboard");
     } catch {
       setError("Network error. Please check your connection and try again.");
     } finally {
