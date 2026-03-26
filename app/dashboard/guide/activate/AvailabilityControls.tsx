@@ -41,7 +41,11 @@ export function ModeSelector({
   const inactive = "border-border hover:border-primary/40";
 
   return (
-    <div className="flex flex-col sm:flex-row gap-3">
+    <div className="space-y-3">
+      <p className="text-muted-foreground text-sm">
+        You can still go online anytime you like.
+      </p>
+      <div className="flex flex-col sm:flex-row gap-3">
       <button
         className={`${base} ${mode === "scheduled" ? active : inactive}`}
         onClick={() => onChange("scheduled")}
@@ -64,6 +68,7 @@ export function ModeSelector({
           No fixed schedule. Go online from your dashboard whenever you want to pick up sessions.
         </p>
       </button>
+      </div>
     </div>
   );
 }
