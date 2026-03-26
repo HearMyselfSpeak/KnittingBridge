@@ -50,7 +50,7 @@ export function ModeSelector({
           I have regular hours
         </p>
         <p className="text-muted-foreground text-xs">
-          Set a weekly schedule so Makers can book during your available times.
+          Set a weekly schedule so Makers can book during your available times. You can always go online for extra sessions anytime.
         </p>
       </button>
       <button
@@ -58,10 +58,10 @@ export function ModeSelector({
         onClick={() => onChange("impulse")}
       >
         <p className="font-medium text-foreground mb-1">
-          I will go online when available
+          Just the online toggle
         </p>
         <p className="text-muted-foreground text-xs">
-          No fixed schedule. Use the online toggle to pick up sessions.
+          No fixed schedule. Go online from your dashboard whenever you want to pick up sessions.
         </p>
       </button>
     </div>
