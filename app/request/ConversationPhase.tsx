@@ -11,6 +11,14 @@ export interface TriageData {
   triageSummary: string;
   sessionType: "15" | "45";
   matchCriteria: string[];
+  skillTags: string[];
+  makerEmotionalProfile: {
+    frustrationLevel: number;
+    confidenceLevel: number;
+    socialComfort: number;
+    urgency: number;
+    learningIntent: number;
+  };
   encouragement: string;
   imageUrls: string[];
 }
@@ -111,6 +119,11 @@ export default function ConversationPhase({ onComplete }: Props) {
       triageSummary: data.summary,
       sessionType: data.sessionType,
       matchCriteria: data.matchCriteria ?? [],
+      skillTags: data.skillTags ?? [],
+      makerEmotionalProfile: data.makerEmotionalProfile ?? {
+        frustrationLevel: 3, confidenceLevel: 3, socialComfort: 3,
+        urgency: 3, learningIntent: 3,
+      },
       encouragement: data.encouragement ?? "",
       imageUrls,
     };

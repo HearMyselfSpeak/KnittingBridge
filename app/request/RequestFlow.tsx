@@ -45,6 +45,8 @@ export default function RequestFlow() {
           triageSummary: triageData.triageSummary,
           sessionType,
           matchCriteria: triageData.matchCriteria,
+          skillTags: triageData.skillTags,
+          makerEmotionalProfile: triageData.makerEmotionalProfile,
           encouragement: triageData.encouragement,
           paymentIntentId,
         }),
