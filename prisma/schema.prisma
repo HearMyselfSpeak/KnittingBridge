@@ -242,6 +242,13 @@ model Request {
   urgency        String?
   aiGuidance     String?  @db.Text
 
+  // Conversational triage
+  sophisticationScore Int?
+  followUpAnswers     String[]
+  triageSummary       String?  @db.Text
+  recommendedSession  String?
+  matchCriteria       String[]
+
   // Maker state (from AI triage)
   frustrationScore   Int?
   confidenceScore    Int?
@@ -256,6 +263,14 @@ model Request {
   user          User                @relation(fields: [userId], references: [id])
   helpSession   HelpSession?
   notifications GuideNotification[]
+}
+
+model BailOutLog {
+  id        String   @id @default(cuid())
+  inputText String   @db.Text
+  ip        String?
+  reason    String
+  createdAt DateTime @default(now())
 }
 
 model HelpSession {

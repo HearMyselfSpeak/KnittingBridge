@@ -1,0 +1,123 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+  Elements,
+  PaymentElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
+
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+);
+
+interface Props {
+  sessionType: "15" | "45";
+  onComplete: (paymentIntentId: string) => void;
+}
+
+function PaymentForm({
+  onComplete,
+}: {
+  onComplete: (paymentIntentId: string) => void;
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+    setLoading(true);
+    setError(null);
+
+    const result = await stripe.confirmPayment({
+      elements,
+      redirect: "if_required",
+    });
+
+    if (result.error) {
+      setError(result.error.message ?? "Payment authorization failed.");
+      setLoading(false);
+    } else if (result.paymentIntent) {
+      onComplete(result.paymentIntent.id);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <PaymentElement />
+      {error && <p className="text-xs text-destructive">{error}</p>}
+      <button
+        type="submit"
+        disabled={loading || !stripe}
+        className="w-full bg-primary text-primary-foreground text-sm font-medium px-4 py-3 rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
+      >
+        {loading ? "Authorizing..." : "Authorize payment"}
+      </button>
+      <p className="text-xs text-muted-foreground text-center">
+        Nothing is charged until the session takes place.
+      </p>
+    </form>
+  );
+}
+
+export default function Step6Payment({ sessionType, onComplete }: Props) {
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function createIntent() {
+      const res = await fetch("/api/request/payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionType }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Could not set up payment.");
+        return;
+      }
+      setClientSecret(data.clientSecret);
+    }
+    createIntent();
+  }, [sessionType]);
+
+  if (error) {
+    return (
+      <div className="max-w-md mx-auto py-8 px-4 text-center">
+        <p className="text-sm text-destructive">{error}</p>
+      </div>
+    );
+  }
+
+  if (!clientSecret) {
+    return (
+      <div className="max-w-md mx-auto py-8 px-4 text-center">
+        <p className="text-sm text-muted-foreground">
+          Setting up payment...
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-md mx-auto py-8 px-4">
+      <h2
+        className="text-xl font-semibold text-foreground text-center mb-2"
+        style={{ fontFamily: "var(--font-serif)" }}
+      >
+        Payment details
+      </h2>
+      <p className="text-sm text-muted-foreground text-center mb-6">
+        Your card will be authorized but not charged yet.
+      </p>
+      <Elements stripe={stripePromise} options={{ clientSecret }}>
+        <PaymentForm onComplete={onComplete} />
+      </Elements>
+    </div>
+  );
+}

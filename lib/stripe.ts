@@ -78,6 +78,21 @@ export async function createPaymentIntent(
   });
 }
 
+// Create a PaymentIntent for card pre-authorization (before Guide matching).
+// No destination yet — transfer_data is added when a Guide accepts.
+export async function createPreAuthIntent(
+  amountCents: number,
+  currency: string = "usd",
+  metadata: Record<string, string> = {},
+): Promise<Stripe.PaymentIntent> {
+  return stripe.paymentIntents.create({
+    amount: amountCents,
+    currency,
+    capture_method: "manual",
+    metadata,
+  });
+}
+
 // Capture a previously authorized PaymentIntent.
 export async function capturePaymentIntent(
   paymentIntentId: string
