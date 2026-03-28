@@ -327,6 +327,7 @@ model HelpSession {
   messages     Message[]
   makerSession MakerSession?
   guideSession GuideSession?
+  payment      Payment?
 }
 
 model GuideNotification {
@@ -377,14 +378,27 @@ model GuideSession {
   user         User         @relation(fields: [userId], references: [id])
 }
 
+enum PaymentStatus {
+  CAPTURED
+  REFUNDED
+  FAILED
+}
+
 model Payment {
-  id              String   @id @default(cuid())
-  stripePaymentId String   @unique
-  amount          Int
-  currency        String   @default("usd")
-  status          String
-  metadata        Json?
-  createdAt       DateTime @default(now())
+  id                    String        @id @default(cuid())
+  helpSessionId         String        @unique
+  stripePaymentIntentId String
+  grossAmount           Int
+  platformFee           Int
+  guideNet              Int
+  status                PaymentStatus @default(CAPTURED)
+  capturedAt            DateTime
+  refundedAt            DateTime?
+  stripeRefundId        String?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  helpSession HelpSession @relation(fields: [helpSessionId], references: [id])
 }
 
 model PlatformConfig {

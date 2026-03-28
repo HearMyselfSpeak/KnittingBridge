@@ -1,4 +1,5 @@
 // POST: Guide accepts a request. First-to-accept wins via optimistic lock.
+// On success: captures PaymentIntent, creates Payment record, sends emails.
 // Returns 409 if another Guide already accepted.
 
 import { NextResponse } from "next/server";
@@ -92,7 +93,22 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json({ ok: true });
+    // Capture payment (non-blocking for the response, but we await it)
+    const { captureOnAccept } = await import("@/lib/capture-payment");
+    const capture = await captureOnAccept({
+      requestId,
+      guideProfileId: guide.id,
+    });
+
+    if (!capture.success) {
+      console.error("[accept] Capture issue:", capture.error);
+      // Match is kept. Payment flagged for admin review.
+    }
+
+    return NextResponse.json({
+      ok: true,
+      paymentCaptured: capture.success,
+    });
   } catch (err) {
     console.error("Request accept error:", err);
     return NextResponse.json(

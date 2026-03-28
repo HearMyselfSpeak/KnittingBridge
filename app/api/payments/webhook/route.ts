@@ -146,16 +146,21 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
 
   const { prisma } = await import("@/lib/prisma");
 
-  // Record the failure in the Payment ledger for audit.
-  await prisma.payment.upsert({
-    where: { stripePaymentId: paymentIntent.id },
-    update: { status: "failed", metadata: { failureMessage } },
-    create: {
-      stripePaymentId: paymentIntent.id,
-      amount: paymentIntent.amount,
-      currency: paymentIntent.currency,
-      status: "failed",
-      metadata: { failureMessage },
-    },
+  // Record failure on the Payment if one exists (capture-payment.ts creates it).
+  const existing = await prisma.payment.findFirst({
+    where: { stripePaymentIntentId: paymentIntent.id },
+  });
+
+  if (existing) {
+    await prisma.payment.update({
+      where: { id: existing.id },
+      data: { status: "FAILED" },
+    });
+  }
+
+  // Also mark the HelpSession as unpaid for surface-level error display.
+  await prisma.helpSession.update({
+    where: { id: sessionId },
+    data: { paid: false },
   });
 }
