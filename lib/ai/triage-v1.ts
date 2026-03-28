@@ -4,6 +4,9 @@
 
 import { z } from "zod";
 import { chatCompletion } from "@/lib/openrouter";
+
+const TRIAGE_MODEL =
+  process.env.TRIAGE_MODEL ?? process.env.OPENROUTER_MODEL;
 import { SOPHISTICATION_SYSTEM_PROMPT } from "./prompts/sophistication-prompt-v1";
 import { buildFollowUpSystemPrompt } from "./prompts/followup-prompt-v1";
 import { buildTriageSystemPrompt } from "./prompts/triage-prompt-v1";
@@ -53,6 +56,7 @@ export async function evaluateSophistication(
   input: string,
 ): Promise<SophisticationResult> {
   const raw = await chatCompletion({
+    model: TRIAGE_MODEL,
     messages: [
       { role: "system", content: SOPHISTICATION_SYSTEM_PROMPT },
       {
@@ -77,6 +81,7 @@ export async function generateFollowUps(
   const systemPrompt = buildFollowUpSystemPrompt(sophisticationScore, photos);
 
   const raw = await chatCompletion({
+    model: TRIAGE_MODEL,
     messages: [
       { role: "system", content: systemPrompt },
       {
@@ -109,6 +114,7 @@ export async function generateTriageResult(
     : "";
 
   const raw = await chatCompletion({
+    model: TRIAGE_MODEL,
     messages: [
       { role: "system", content: systemPrompt },
       {
