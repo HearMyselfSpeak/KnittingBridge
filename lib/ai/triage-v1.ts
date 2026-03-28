@@ -26,10 +26,23 @@ export const SophisticationResultSchema = z.object({
 
 export const FollowUpSchema = z.array(z.string()).min(1).max(4);
 
+const SKILL_TAG_VALUES = [
+  "garments", "fitSizing", "socks", "lace", "colorwork",
+  "cables", "patternMod", "yarnSub", "repair", "machine",
+] as const;
+
 export const TriageResultSchema = z.object({
   summary: z.string().min(1),
   sessionType: z.enum(["15", "45"]),
   matchCriteria: z.array(z.string()).min(1).max(6),
+  skillTags: z.array(z.enum(SKILL_TAG_VALUES)).min(1).max(4),
+  makerEmotionalProfile: z.object({
+    frustrationLevel: z.number().min(1).max(5),
+    confidenceLevel: z.number().min(1).max(5),
+    socialComfort: z.number().min(1).max(5),
+    urgency: z.number().min(1).max(5),
+    learningIntent: z.number().min(1).max(5),
+  }),
   encouragement: z.string().min(1),
 });
 

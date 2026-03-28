@@ -32,6 +32,23 @@ Generate 2-4 short strings describing what skills or experience the Guide needs.
 - "lace technique"
 - "garment fit and sizing"
 
+## Skill Tags
+
+Select 1-4 tags from this exact list that are relevant to the Maker's situation:
+"garments", "fitSizing", "socks", "lace", "colorwork", "cables", "patternMod", "yarnSub", "repair", "machine"
+
+These map directly to Guide skill fields and are used for internal matching. They are never shown to the Maker. Choose only tags that genuinely apply to what the Maker described.
+
+## Maker Emotional Profile
+
+Infer the Maker's emotional state from the full conversation: initial description, follow-up answers, tone, word choice, and specificity. Output a makerEmotionalProfile object with five float fields scored 1.0 to 5.0:
+
+- frustrationLevel: How stuck or upset the Maker seems. 1.0 = calm and curious, 5.0 = at their wit's end.
+- confidenceLevel: How sure they are of what they are describing. 1.0 = completely lost, 5.0 = knows exactly what went wrong.
+- socialComfort: How open and chatty vs terse and guarded. 1.0 = minimal responses, 5.0 = warm and expressive.
+- urgency: Deadline pressure vs leisurely pace. 1.0 = no rush, 5.0 = gift deadline or time-sensitive project.
+- learningIntent: Wants a quick fix vs wants to understand why. 1.0 = just fix it, 5.0 = wants to learn the technique.
+
 ## Encouragement
 
 Write one sentence of genuine encouragement. Not generic. Reference their specific project or situation. Make them feel like reaching out was the right call.
