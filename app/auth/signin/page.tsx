@@ -1,54 +1,14 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useState, Suspense } from "react";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import EmailPasswordForm from "./EmailPasswordForm";
 
 function SignInForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
-  const [email, setEmail] = useState("");
-  const [emailSent, setEmailSent] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleEmailSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await signIn("nodemailer", {
-        email,
-        callbackUrl,
-        redirect: false,
-      });
-      if (result?.error) {
-        setError("Something went wrong. Please try again.");
-      } else {
-        setEmailSent(true);
-      }
-    } catch {
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  if (emailSent) {
-    return (
-      <div className="text-center">
-        <p className="text-sm font-medium text-foreground mb-2">
-          Check your email
-        </p>
-        <p className="text-sm text-muted-foreground">
-          A sign-in link was sent to{" "}
-          <span className="font-medium text-foreground">{email}</span>. It
-          expires in 10 minutes.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -90,30 +50,13 @@ function SignInForm() {
         </div>
         <div className="relative flex justify-center text-xs">
           <span className="bg-background px-3 text-muted-foreground">
-            or continue with email
+            or use email and password
           </span>
         </div>
       </div>
 
-      {/* Email magic link */}
-      <form onSubmit={handleEmailSubmit} className="space-y-3">
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="your@email.com"
-          required
-          className="w-full border border-border rounded-md px-3 py-2.5 text-sm bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-shadow"
-        />
-        {error && <p className="text-xs text-destructive">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading || !email}
-          className="w-full bg-primary text-primary-foreground text-sm font-medium px-4 py-2.5 rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? "Sending..." : "Send sign-in link"}
-        </button>
-      </form>
+      {/* Email/Password */}
+      <EmailPasswordForm callbackUrl={callbackUrl} />
     </div>
   );
 }
