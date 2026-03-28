@@ -8,7 +8,10 @@ interface RefundResult {
   stripeRefundId?: string;
 }
 
-export async function processRefund(paymentId: string): Promise<RefundResult> {
+export async function processRefund(
+  paymentId: string,
+  amountCents?: number,
+): Promise<RefundResult> {
   const { prisma } = await import("@/lib/prisma");
   const { stripe } = await import("@/lib/stripe");
 
@@ -35,9 +38,13 @@ export async function processRefund(paymentId: string): Promise<RefundResult> {
   }
 
   try {
-    const refund = await stripe.refunds.create({
+    const refundParams: { payment_intent: string; amount?: number } = {
       payment_intent: payment.stripePaymentIntentId,
-    });
+    };
+    if (amountCents !== undefined) {
+      refundParams.amount = amountCents;
+    }
+    const refund = await stripe.refunds.create(refundParams);
 
     await prisma.$transaction([
       prisma.payment.update({
@@ -64,17 +71,4 @@ export async function processRefund(paymentId: string): Promise<RefundResult> {
   }
 }
 
-// ─── No-show auto-refund stub ─────────────────────────────────────────────
-// Trigger condition: If the Guide has not joined the Daily.co room within
-// 10 minutes of the session start time, auto-refund the Maker.
-// This cannot fire until Phase 6 builds the session/video infrastructure.
-// The Daily.co webhook or a scheduled check will call this function.
-
-export async function handleGuideNoShow(
-  _sessionId: string,
-): Promise<RefundResult> {
-  // TODO (Phase 6): Look up the HelpSession, verify Guide has not joined,
-  // find the associated Payment, and call processRefund().
-  // For now this is a stub awaiting Daily.co integration.
-  return { success: false, error: "No-show detection not yet implemented" };
-}
+// No-show stubs moved to lib/no-show.ts (Task 9).

@@ -59,6 +59,7 @@ async function fetchEligibleGuides(skillTags: SkillTag[]): Promise<GuideCandidat
       status: "APPROVED",
       activationComplete: true,
       stripeOnboarded: true,
+      isPoolSuspended: false,
     },
     select: {
       id: true, activeSessions: true, currentCapacity: true,
