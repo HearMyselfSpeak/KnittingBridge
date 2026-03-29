@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { REFINEMENT_OPTIONS } from "@/lib/ai/refinement";
 
+import type { AccessInfo } from "./RecolorCounter";
+
 interface Props {
   sessionId: string;
-  onRefined: (imageUrl: string, label: string) => void;
+  onRefined: (imageUrl: string, label: string, access?: AccessInfo) => void;
   onRefineStart?: () => void;
   onRefineEnd?: () => void;
   disabled?: boolean;
@@ -35,9 +37,9 @@ export function RefinementBar({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId, instruction, baselineImageUrl }),
       });
-      const data = (await res.json()) as { imageUrl?: string; error?: string };
+      const data = (await res.json()) as { imageUrl?: string; error?: string; access?: AccessInfo };
       if (!res.ok) throw new Error(data.error ?? "Refinement failed");
-      onRefined(data.imageUrl!, label);
+      onRefined(data.imageUrl!, label, data.access);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Refinement failed");
     } finally {

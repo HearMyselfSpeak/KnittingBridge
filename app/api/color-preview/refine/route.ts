@@ -38,6 +38,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
+    // Tier gate: check before spending $0.19 on AI
+    const cpCookieId = cookieStore.get("kb_cp_id")?.value;
+    if (cpCookieId) {
+      const { checkRecolorAccess } = await import("@/lib/color-previews-gate");
+      const access = await checkRecolorAccess(cpCookieId, session?.user?.id);
+      if (!access.allowed) {
+        return NextResponse.json(
+          { error: "limit_reached", tier: access.tier, remaining: access.remaining, daysUntilReset: access.daysUntilReset },
+          { status: 403 },
+        );
+      }
+    }
+
     const lastPreview = colorSession.previews[0];
     if (!lastPreview) {
       return NextResponse.json(
@@ -106,7 +119,20 @@ export async function POST(req: NextRequest) {
       data: { status: "PREVIEW_READY" },
     });
 
-    return NextResponse.json({ previewId: preview.id, imageUrl });
+    // Record usage after successful refinement
+    if (cpCookieId) {
+      const { recordRecolorUsage } = await import("@/lib/color-previews-gate");
+      await recordRecolorUsage(cpCookieId, sessionId, session?.user?.id);
+    }
+
+    // Return updated access info for client counter
+    let accessInfo = null;
+    if (cpCookieId) {
+      const { checkRecolorAccess } = await import("@/lib/color-previews-gate");
+      accessInfo = await checkRecolorAccess(cpCookieId, session?.user?.id);
+    }
+
+    return NextResponse.json({ previewId: preview.id, imageUrl, access: accessInfo });
   } catch (error) {
     const { prisma } = await import("@/lib/prisma");
     const body = await req.json().catch(() => ({}));

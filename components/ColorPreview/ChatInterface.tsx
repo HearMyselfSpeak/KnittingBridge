@@ -6,6 +6,7 @@ import { PaletteBuilder } from "./PaletteBuilder";
 import { PreviewCanvas, type PreviewFrame } from "./PreviewCanvas";
 import { RefinementBar } from "./RefinementBar";
 import { StepBar } from "./StepBar";
+import { RecolorCounter, type AccessInfo } from "./RecolorCounter";
 import { buildPreviewLabel } from "@/lib/ai/preview-label";
 import type {
   ColorSessionStatus,
@@ -36,6 +37,7 @@ export function ChatInterface({ sessionId, initialStatus, initialAssets, initial
   const [isRefining, setIsRefining] = useState(false);
   const [baseline, setBaseline] = useState<string | null>(initialAssets.find((a) => a.kind === "GARMENT_SCREENSHOT" || a.kind === "GARMENT_CLOSEUP")?.publicUrl ?? null);
   const [error, setError] = useState<string | null>(null);
+  const [access, setAccess] = useState<AccessInfo | null>(null);
 
   const garmentAssets = initialAssets.filter(
     (a) => a.kind === "GARMENT_SCREENSHOT" || a.kind === "GARMENT_CLOSEUP"
@@ -89,8 +91,12 @@ export function ChatInterface({ sessionId, initialStatus, initialAssets, initial
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId }),
       });
-      const data = (await res.json()) as { imageUrl?: string; error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Generation failed");
+      const data = (await res.json()) as { imageUrl?: string; error?: string; access?: AccessInfo };
+      if (!res.ok) {
+        if (data.error === "limit_reached") { setAccess(data as unknown as AccessInfo); setStatus("READY_FOR_PREVIEW"); return; }
+        throw new Error(data.error ?? "Generation failed");
+      }
+      if (data.access) setAccess(data.access);
       setFrames((prev) => [...prev, { imageUrl: data.imageUrl!, label: buildPreviewLabel(currentAssignments) }]);
       setBaseline(garmentImageUrl);
       setStatus("PREVIEW_READY");
@@ -100,14 +106,12 @@ export function ChatInterface({ sessionId, initialStatus, initialAssets, initial
     }
   }
 
-  function handleRefined(imageUrl: string, label: string) {
+  function handleRefined(imageUrl: string, label: string, accessInfo?: AccessInfo) {
     setFrames((prev) => [...prev, { imageUrl, label }]);
+    if (accessInfo) setAccess(accessInfo);
   }
 
-  function handleRefineStart() {
-    console.log("[ChatInterface] baseline at refine start:", baseline);
-    setIsRefining(true);
-  }
+  function handleRefineStart() { setIsRefining(true); }
   function handleRefineEnd() { setIsRefining(false); }
 
   if (status === "ANALYZING_GARMENT") {
@@ -122,16 +126,12 @@ export function ChatInterface({ sessionId, initialStatus, initialAssets, initial
     );
   }
 
-  if (status === "FAILED") {
-    return (
-      <div className="space-y-4 py-8 text-center">
-        <p className="text-sm text-foreground">{error ?? "Something went wrong."}</p>
-        <button onClick={() => { setStatus("AWAITING_GARMENT_UPLOAD"); setError(null); }} className="text-sm font-medium text-primary hover:underline">
-          Start over
-        </button>
-      </div>
-    );
-  }
+  if (status === "FAILED") return (
+    <div className="space-y-4 py-8 text-center">
+      <p className="text-sm text-foreground">{error ?? "Something went wrong."}</p>
+      <button onClick={() => { setStatus("AWAITING_GARMENT_UPLOAD"); setError(null); }} className="text-sm font-medium text-primary hover:underline">Start over</button>
+    </div>
+  );
 
   if (status === "GENERATING_PREVIEW") {
     return (
@@ -143,25 +143,15 @@ export function ChatInterface({ sessionId, initialStatus, initialAssets, initial
   }
 
   if (status === "PREVIEW_READY" && frames.length > 0) {
+    const gated = access !== null && !access.allowed;
     return (
       <div className="space-y-6">
         <StepBar current={3} />
+        <RecolorCounter access={access} onAccessChange={setAccess} />
         <PreviewCanvas originalImageUrl={garmentImageUrl} frames={frames} isLoading={isRefining} regionLabels={analysis?.regions.map((r) => r.label)} selectedBaseline={baseline} onBaselineSelect={setBaseline} />
-        <RefinementBar
-          sessionId={sessionId}
-          onRefined={handleRefined}
-          onRefineStart={handleRefineStart}
-          onRefineEnd={handleRefineEnd}
-          baselineImageUrl={baseline}
-        />
+        {!gated && <RefinementBar sessionId={sessionId} onRefined={handleRefined} onRefineStart={handleRefineStart} onRefineEnd={handleRefineEnd} baselineImageUrl={baseline} />}
         <div className="pt-2 border-t border-border">
-          <button
-            onClick={() => setStatus("AWAITING_COLOR_DIRECTION")}
-            disabled={isRefining}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            Try different colors
-          </button>
+          <button onClick={() => setStatus("AWAITING_COLOR_DIRECTION")} disabled={isRefining} className="text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed">Try different colors</button>
         </div>
       </div>
     );
@@ -180,9 +170,14 @@ export function ChatInterface({ sessionId, initialStatus, initialAssets, initial
           <PaletteBuilder analysis={analysis} sessionId={sessionId} initialAssignments={initialAssignments} onAssigned={handleAssigned} />
         </div>
         {status === "READY_FOR_PREVIEW" && (
-          <button onClick={() => void handleGenerate()} className="w-full bg-accent text-accent-foreground text-sm font-medium px-4 py-3 rounded-md hover:opacity-90 transition-opacity">
-            Generate preview
-          </button>
+          <>
+            <RecolorCounter access={access} onAccessChange={setAccess} />
+            {(!access || access.allowed) && (
+              <button onClick={() => void handleGenerate()} className="w-full bg-accent text-accent-foreground text-sm font-medium px-4 py-3 rounded-md hover:opacity-90 transition-opacity">
+                Generate preview
+              </button>
+            )}
+          </>
         )}
         {error && <p className="text-sm text-destructive">{error}</p>}
       </div>

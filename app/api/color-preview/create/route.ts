@@ -26,6 +26,17 @@ export async function POST(_req: NextRequest) {
       });
     }
 
+    // Set persistent kb_cp_id cookie for tier tracking (if not already set)
+    if (!cookieStore.get("kb_cp_id")?.value) {
+      const { randomUUID } = await import("crypto");
+      cookieStore.set("kb_cp_id", randomUUID(), {
+        httpOnly: false,
+        secure: true,
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 365 * 2, // 2 years
+      });
+    }
+
     return NextResponse.json({ sessionId: colorSession.id });
   } catch (error) {
     console.error("[color-preview/create]", error);

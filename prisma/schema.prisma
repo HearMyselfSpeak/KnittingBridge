@@ -149,6 +149,8 @@ model User {
   pushSubscriptions    PushSubscription[]
   demerits             Demerit[]
   makerCredits         MakerCredit[]
+  recolorBalance       RecolorBalance?
+  colorPreviewsUsage   ColorPreviewsUsage?
 }
 
 model GuideProfile {
@@ -468,6 +470,37 @@ model CancellationRecord {
   createdAt        DateTime    @default(now())
 
   session HelpSession @relation(fields: [sessionId], references: [id])
+}
+
+// ─── Color Preview Usage / Tier Gating ──────────────────────────────────────
+
+model ColorPreviewsUsage {
+  id                    String   @id @default(cuid())
+  cookieId              String   @unique
+  userId                String?  @unique
+  recolorsUsedThisWeek  Int      @default(0)
+  projectsUsedThisWeek  Int      @default(0)
+  projectIdsThisWeek    String[] @default([])
+  weekStartedAt         DateTime @default(now())
+  firstSeenAt           DateTime @default(now())
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([cookieId])
+  @@index([userId])
+}
+
+model RecolorBalance {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  balance   Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 // ─── Color Preview Tool Models ───────────────────────────────────────────────
