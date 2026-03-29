@@ -105,9 +105,37 @@ export async function POST(req: Request) {
       // Match is kept. Payment flagged for admin review.
     }
 
+    // Create Daily.co room for the live session
+    let sessionUrl: string | undefined;
+    try {
+      const helpSession = await prisma.helpSession.findUnique({
+        where: { requestId },
+        select: { id: true, request: { select: { recommendedSession: true } } },
+      });
+
+      if (helpSession) {
+        const minutes = helpSession.request.recommendedSession === "15" ? 15 : 45;
+        const { createSessionRoom } = await import("@/lib/daily");
+        const room = await createSessionRoom(helpSession.id, minutes);
+        await prisma.helpSession.update({
+          where: { id: helpSession.id },
+          data: {
+            videoRoomName: room.roomName,
+            videoRoomUrl: room.roomUrl,
+            status: "WAITING_ROOM",
+          },
+        });
+        sessionUrl = `/session/${helpSession.id}`;
+      }
+    } catch (err) {
+      console.error("[accept] Room creation failed:", err);
+      // Non-blocking: session can still proceed, admin handles room issues
+    }
+
     return NextResponse.json({
       ok: true,
       paymentCaptured: capture.success,
+      sessionUrl,
     });
   } catch (err) {
     console.error("Request accept error:", err);
