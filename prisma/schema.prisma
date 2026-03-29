@@ -151,6 +151,9 @@ model User {
   makerCredits         MakerCredit[]
   recolorBalance       RecolorBalance?
   colorPreviewsUsage   ColorPreviewsUsage?
+  ratingsGiven         Rating[]       @relation("RaterRelation")
+  ratingsReceived      Rating[]       @relation("RatedUserRelation")
+  tips                 Tip[]
 }
 
 model GuideProfile {
@@ -233,6 +236,7 @@ model GuideProfile {
   helpSessions  HelpSession[]
   notifications GuideNotification[]
   guideSessions GuideSession[]
+  tips          Tip[]
 }
 
 model Request {
@@ -311,6 +315,10 @@ model HelpSession {
   videoEndedAt   DateTime?
   recordingUrl   String?
 
+  // Participant join tracking
+  makerJoinedAt DateTime?
+  guideJoinedAt DateTime?
+
   // Payment
   amount                Int      @default(0)
   platformFee           Int      @default(0)
@@ -326,6 +334,15 @@ model HelpSession {
   transcript  Json?
   summary     String?   @db.Text
 
+  // AI-generated session notes
+  makerNotes           String?   @db.Text
+  guideNotes           String?   @db.Text
+  transcriptProcessedAt DateTime?
+
+  // Session end tracking
+  endedAt DateTime?
+  endedBy String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -337,6 +354,9 @@ model HelpSession {
   payment            Payment?
   demerits           Demerit[]
   cancellationRecord CancellationRecord?
+  ratings            Rating[]
+  tips               Tip[]
+  bypassFlags        BypassFlag[]
 }
 
 model GuideNotification {
@@ -429,6 +449,12 @@ enum CancelledBy {
   GUIDE
 }
 
+enum FlaggedParty {
+  MAKER
+  GUIDE
+  BOTH
+}
+
 model Demerit {
   id        String     @id @default(cuid())
   userId    String
@@ -470,6 +496,60 @@ model CancellationRecord {
   createdAt        DateTime    @default(now())
 
   session HelpSession @relation(fields: [sessionId], references: [id])
+}
+
+// ─── Session Rating / Tip / Bypass ──────────────────────────────────────────
+
+model Rating {
+  id            String    @id @default(cuid())
+  helpSessionId String
+  raterId       String
+  ratedUserId   String
+  score         Int
+  reasons       Json?
+  freeText      String?   @db.Text
+  aiAnalysis    String?   @db.Text
+  revealedAt    DateTime?
+  createdAt     DateTime  @default(now())
+
+  helpSession HelpSession @relation(fields: [helpSessionId], references: [id])
+  rater       User        @relation("RaterRelation", fields: [raterId], references: [id])
+  ratedUser   User        @relation("RatedUserRelation", fields: [ratedUserId], references: [id])
+
+  @@unique([helpSessionId, raterId])
+  @@index([ratedUserId])
+}
+
+model Tip {
+  id                    String   @id @default(cuid())
+  guideProfileId        String
+  helpSessionId         String
+  makerId               String
+  amountCents           Int
+  stripePaymentIntentId String
+  createdAt             DateTime @default(now())
+
+  guideProfile GuideProfile @relation(fields: [guideProfileId], references: [id])
+  helpSession  HelpSession  @relation(fields: [helpSessionId], references: [id])
+  maker        User         @relation(fields: [makerId], references: [id])
+
+  @@index([guideProfileId])
+  @@index([makerId])
+}
+
+model BypassFlag {
+  id            String       @id @default(cuid())
+  helpSessionId String
+  flaggedParty  FlaggedParty
+  reason        String       @db.Text
+  reviewedAt    DateTime?
+  reviewedBy    String?
+  resolution    String?      @db.Text
+  createdAt     DateTime     @default(now())
+
+  helpSession HelpSession @relation(fields: [helpSessionId], references: [id])
+
+  @@index([helpSessionId])
 }
 
 // ─── Color Preview Usage / Tier Gating ──────────────────────────────────────
