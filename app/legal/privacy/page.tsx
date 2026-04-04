@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — KnittingBridge",
+  title: "Privacy Policy | KnittingBridge",
 };
 
 export default function Privacy() {
@@ -32,7 +32,7 @@ export default function Privacy() {
           </p>
           <p className="mb-3">
             <span className="font-medium text-foreground">Session data:</span>{" "}
-            Descriptions of knitting problems, uploaded photos, message
+            Descriptions of knitting questions, uploaded photos, message
             transcripts, session durations, and Maker feedback.
           </p>
           <p className="mb-3">
@@ -67,7 +67,7 @@ export default function Privacy() {
               "Detecting abuse and enforcing the Terms of Service",
             ].map((item) => (
               <li key={item} className="flex gap-2">
-                <span className="text-accent/60 shrink-0">—</span>
+                <span className="text-accent/60 shrink-0">·</span>
                 {item}
               </li>
             ))}
@@ -108,7 +108,7 @@ export default function Privacy() {
               "Legal requirements: we may disclose data when required by law",
             ].map((item) => (
               <li key={item} className="flex gap-2">
-                <span className="text-accent/60 shrink-0">—</span>
+                <span className="text-accent/60 shrink-0">·</span>
                 {item}
               </li>
             ))}

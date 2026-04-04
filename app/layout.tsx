@@ -18,7 +18,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "KnittingBridge — Expert help, when you need it",
+  title: "KnittingBridge | Expert help, when you need it",
   description:
     "Connect with experienced knitters for short, paid sessions. Get unstuck, get back to making.",
   metadataBase: new URL("https://knittingbridge.com"),

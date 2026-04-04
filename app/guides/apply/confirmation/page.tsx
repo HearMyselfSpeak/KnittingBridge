@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Application submitted — KnittingBridge",
+  title: "Application submitted | KnittingBridge",
 };
 
 interface Props {

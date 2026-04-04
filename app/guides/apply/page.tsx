@@ -2,7 +2,7 @@ import { ApplicationForm } from "@/components/GuideApplication/ApplicationForm";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Apply to become a Guide — KnittingBridge",
+  title: "Apply to become a Guide | KnittingBridge",
   description:
     "Share your knitting expertise and get paid to help Makers who are stuck.",
 };

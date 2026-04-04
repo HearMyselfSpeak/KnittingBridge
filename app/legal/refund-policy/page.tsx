@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Refund Policy — KnittingBridge",
+  title: "Refund Policy | KnittingBridge",
 };
 
 export default function RefundPolicy() {
@@ -64,7 +64,7 @@ export default function RefundPolicy() {
               },
             ].map(({ label, desc }) => (
               <li key={label} className="flex gap-2">
-                <span className="text-accent/60 shrink-0 mt-0.5">—</span>
+                <span className="text-accent/60 shrink-0 mt-0.5">·</span>
                 <div>
                   <p className="font-medium text-foreground mb-0.5">{label}</p>
                   <p>{desc}</p>

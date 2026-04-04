@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "How It Works — KnittingBridge",
+  title: "How It Works | KnittingBridge",
   description:
     "How KnittingBridge connects knitters who are stuck with experienced Guides for short, paid sessions.",
 };
@@ -50,7 +50,7 @@ export default function HowItWorks() {
             {
               step: "02",
               title: "Describe your new colors",
-              body: "You have three options: describe specific shades in plain language, name a palette theme (forest, coastal, jewel tones, aurora), or upload photos of yarn you already own. You can mix approaches — describe one color and upload a photo for another.",
+              body: "You have three options: describe specific shades in plain language, name a palette theme (forest, coastal, jewel tones, aurora), or upload photos of yarn you already own. You can mix approaches: describe one color and upload a photo for another.",
             },
             {
               step: "03",
@@ -60,7 +60,7 @@ export default function HowItWorks() {
             {
               step: "04",
               title: "See the preview",
-              body: "One image. The garment structure, silhouette, and motif placement are unchanged. Only the yarn colors are replaced. After seeing it, you can refine — shift warmer, increase contrast, try a different palette — as many times as you like.",
+              body: "One image. The garment structure, silhouette, and motif placement are unchanged. Only the yarn colors are replaced. After seeing it, you can refine: shift warmer, increase contrast, try a different palette. As many times as you like.",
             },
           ].map(({ step, title, body }) => (
             <div key={step} className="flex gap-6">
@@ -111,7 +111,7 @@ export default function HowItWorks() {
           {[
             {
               step: "01",
-              title: "Describe your problem",
+              title: "Describe your project",
               body: "Write out what you are stuck on. Upload a photo of your work if it helps. Include a pattern link if there is one. The more specific you are, the better the match.",
             },
             {
@@ -122,12 +122,12 @@ export default function HowItWorks() {
             {
               step: "03",
               title: "A Guide accepts",
-              body: "Qualified Guides are notified of your request. The first one to accept takes it. You do not choose your Guide — the system matches based on technical skills and how they communicate. The match is intentional.",
+              body: "Qualified Guides are notified of your request. The first one to accept takes it. You do not choose your Guide. The system matches based on technical skills and how they communicate. The match is intentional.",
             },
             {
               step: "04",
               title: "The session",
-              body: "Async sessions happen through text and photos, typically resolved within a few hours. Live sessions are short video calls — 20 to 40 minutes — embedded in the platform. No Zoom, no external links.",
+              body: "Async sessions happen through text and photos, typically resolved within a few hours. Live sessions are short video calls (20 to 40 minutes) embedded in the platform. No Zoom, no external links.",
             },
             {
               step: "05",
@@ -159,7 +159,7 @@ export default function HowItWorks() {
             href="/get-help"
             className="inline-flex items-center justify-center bg-primary text-primary-foreground text-sm font-medium px-6 py-3 rounded-md hover:opacity-90 transition-opacity"
           >
-            Describe your problem
+            Describe your project
           </Link>
         </div>
       </section>
@@ -243,7 +243,7 @@ export default function HowItWorks() {
           {[
             {
               q: "Do I choose my Guide?",
-              a: "No. The system selects the match based on what your request needs and how you communicate. You will not see a list of Guides, browse profiles, or choose by name. This is intentional — it produces better results than self-selection.",
+              a: "No. The system selects the match based on what your request needs and how you communicate. You will not see a list of Guides, browse profiles, or choose by name. This is intentional. It produces better results than self-selection.",
             },
             {
               q: "What skill levels can Makers have?",
@@ -255,7 +255,7 @@ export default function HowItWorks() {
             },
             {
               q: "What if I'm not satisfied?",
-              a: "See the refund policy for details on cancellations and disputes. Sessions must be scoped — if the issue turns out to need substantially more work than described, you and your Guide discuss how to proceed.",
+              a: "See the refund policy for details on cancellations and disputes. Sessions must be scoped. If the issue turns out to need substantially more work than described, you and your Guide discuss how to proceed.",
             },
           ].map(({ q, a }) => (
             <div key={q} className="border-t border-border pt-5">

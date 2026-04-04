@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 import { ReviewActions } from "@/components/Admin/ReviewActions";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Application Detail — Admin — KnittingBridge" };
+export const metadata: Metadata = { title: "Application Detail | Admin | KnittingBridge" };
 
 const AREA_LABELS: Record<string, string> = {
   garments: "Garments", fitSizing: "Fit & Sizing", socks: "Socks",
@@ -35,7 +35,7 @@ function Field({ label, value }: { label: string; value?: string | number | null
   return (
     <div>
       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</p>
-      <p className="text-sm text-foreground mt-0.5">{value ?? "—"}</p>
+      <p className="text-sm text-foreground mt-0.5">{value ?? "-"}</p>
     </div>
   );
 }
@@ -128,7 +128,7 @@ export default async function ApplicationDetailPage({ params }: Props) {
         </Section>
 
         <Section title="Scenario Responses">
-          <Field label='"I think I ruined this." — What do you say first?' value={sc.q1} />
+          <Field label='"I think I ruined this." What do you say first?' value={sc.q1} />
           <Field label="When do you recommend starting over?" value={sc.q2} />
           <Field label="How do you explain a tension issue?" value={sc.q3} />
         </Section>

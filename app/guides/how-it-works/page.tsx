@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Guide Flow — KnittingBridge",
+  title: "Guide Flow | KnittingBridge",
   description:
     "How the Guide experience works on KnittingBridge, from application to payout.",
 };
@@ -60,7 +60,7 @@ export default function GuidesHowItWorks() {
             {
               step: "05",
               title: "Scenario responses",
-              body: "Three short written responses to scenarios we give you — for example, how you approach a frustrated Maker, when you recommend starting over, and how you explain a tension issue. These assess how you communicate, not just what you know.",
+              body: "Three short written responses to scenarios we give you. For example,, how you approach a frustrated Maker, when you recommend starting over, and how you explain a tension issue. These assess how you communicate, not just what you know.",
             },
             {
               step: "06",
@@ -123,7 +123,7 @@ export default function GuidesHowItWorks() {
             {
               step: "02",
               title: "Five-minute window",
-              body: "You have five minutes to accept or decline. If you do not respond, the request expands to other qualified Guides. There is no penalty for declining — the system learns your preferences over time.",
+              body: "You have five minutes to accept or decline. If you do not respond, the request expands to other qualified Guides. There is no penalty for declining. The system learns your preferences over time.",
             },
             {
               step: "03",
@@ -191,7 +191,7 @@ export default function GuidesHowItWorks() {
             </p>
             <p className="text-xs text-muted-foreground mb-3">$60–$90 typical</p>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              A video call embedded in the platform — no external apps, no
+              A video call embedded in the platform. No external apps, no
               Zoom, no leaving the site. 20 to 40 minutes. Better for complex
               fit issues, technique demonstration, and anything where seeing
               the actual work in real time makes the difference.

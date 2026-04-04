@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "About — KnittingBridge",
+  title: "About | KnittingBridge",
   description:
     "Why KnittingBridge exists, what it is, and what it is not.",
 };
@@ -22,7 +22,7 @@ export default function About() {
         </h1>
         <p className="text-lg text-muted-foreground leading-relaxed">
           That is the idea behind this platform. Not celebration. Not
-          community theater. Just the practical thing — getting from stuck to
+          community theater. Just the practical thing: getting from stuck to
           moving again.
         </p>
       </div>
@@ -33,7 +33,7 @@ export default function About() {
             className="text-xl font-semibold text-primary mb-3"
             style={{ fontFamily: "var(--font-serif)" }}
           >
-            The problem
+            What we noticed
           </h2>
           <p className="mb-3">
             Knitters get stuck. The pattern has an error. The tension is off.
@@ -62,9 +62,9 @@ export default function About() {
             What KnittingBridge is
           </h2>
           <p className="mb-3">
-            A two-sided platform. Makers — knitters who are stuck — submit
-            requests describing their problem. Guides — experienced knitters who
-            have seen this kind of problem before — respond with focused
+            A two-sided platform. Makers (knitters who are stuck) submit
+            requests describing their project. Guides (experienced knitters who
+            have seen this kind of project before) respond with focused
             guidance through a short, paid session.
           </p>
           <p className="mb-3">
@@ -98,7 +98,7 @@ export default function About() {
             It is not coaching, tutoring, or instruction. Guides are not
             teachers. They are experienced practitioners who can look at a
             specific situation and offer a specific answer. The goal is
-            resolution, not education — unless the Maker wants to understand
+            resolution, not education, unless the Maker wants to understand
             the reason, in which case a good Guide will explain it.
           </p>
           <p>
@@ -119,7 +119,7 @@ export default function About() {
             Before you begin a project, or before you frog what you have and
             start over in different yarn, it helps to see it. The Color Preview
             Tool lets you upload a photo of any finished knitted garment and
-            preview it in new colors — before you buy anything.
+            preview it in new colors, before you buy anything.
           </p>
           <p>
             The tool does one thing only: it changes yarn colors. It does not

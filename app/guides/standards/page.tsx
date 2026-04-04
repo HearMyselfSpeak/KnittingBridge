@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Guide Standards — KnittingBridge",
+  title: "Guide Standards | KnittingBridge",
   description:
     "What KnittingBridge expects from Guides: role clarity, communication standards, and conduct.",
 };
@@ -46,12 +46,12 @@ export default function GuidesStandards() {
                 "Answer one specific question clearly",
                 "Look at the actual work and say what they see",
                 "Offer a path forward without overcomplicating it",
-                "Know when a problem is simple and say so directly",
+                "Know when a question is simple and say so directly",
                 "Explain the reason, if the Maker wants to understand it",
                 "Complete a session within the agreed scope",
               ].map((item) => (
                 <li key={item} className="flex gap-2">
-                  <span className="text-accent shrink-0">—</span>
+                  <span className="text-accent shrink-0">·</span>
                   {item}
                 </li>
               ))}
@@ -72,7 +72,7 @@ export default function GuidesStandards() {
                 "Dismiss a Maker's frustration as unimportant",
               ].map((item) => (
                 <li key={item} className="flex gap-2">
-                  <span className="text-accent shrink-0">—</span>
+                  <span className="text-accent shrink-0">·</span>
                   {item}
                 </li>
               ))}
@@ -127,19 +127,19 @@ export default function GuidesStandards() {
             Sessions are scoped. That means when a Maker submits a request
             about tension on the yoke of a sweater, the session is about that.
             If during the session it becomes clear that the sweater has other
-            problems, you can note them, but you are not obligated to address
+            issues, you can note them, but you are not obligated to address
             them in the same session, and the Maker has not paid for them.
           </p>
           <p>
             If a session turns out to require substantially more work than the
             request described, the Guide is expected to communicate that clearly
-            and agree with the Maker on how to proceed — whether that means a
+            and agree with the Maker on how to proceed, whether that means a
             second session, a different session type, or a focused answer to
             the original question only.
           </p>
           <p>
-            Guides who regularly expand sessions beyond the agreed scope — in
-            either direction, over-delivering or under-delivering — will be
+            Guides who regularly expand sessions beyond the agreed scope, in
+            either direction, over-delivering or under-delivering, will be
             reviewed. The goal is a consistently scoped, predictably useful
             experience.
           </p>
@@ -161,7 +161,7 @@ export default function GuidesStandards() {
           outside services you offer.
         </p>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          This is not about control — it is about trust. Makers come to the
+          This is not about control. It is about trust. Makers come to the
           platform because the matching system provides a consistent, safe
           experience. Circumventing it breaks that trust for everyone. Guides
           found to be soliciting off-platform relationships will have their
@@ -179,7 +179,7 @@ export default function GuidesStandards() {
         </h2>
         <p className="text-sm text-muted-foreground leading-relaxed mb-4">
           After each session, Makers provide private feedback. This is not a
-          public rating — it is not visible to other Makers, other Guides, or
+          public rating. It is not visible to other Makers, other Guides, or
           anywhere on the platform. It is used internally to calibrate matching
           and to identify Guides who may need support or review.
         </p>

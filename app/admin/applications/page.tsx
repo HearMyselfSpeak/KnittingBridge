@@ -5,7 +5,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Applications — Admin — KnittingBridge" };
+export const metadata: Metadata = { title: "Applications | Admin | KnittingBridge" };
 
 const TABS = [
   { label: "Pending",  value: "PENDING" },
@@ -82,7 +82,7 @@ export default async function AdminApplicationsPage({ searchParams }: Props) {
                 <div className="flex justify-between items-start gap-4">
                   <div className="min-w-0">
                     <p className="font-medium text-foreground truncate">
-                      {p.user.name ?? "—"}
+                      {p.user.name ?? "-"}
                     </p>
                     <p className="text-sm text-muted-foreground">{p.user.email}</p>
                     {p.location && (

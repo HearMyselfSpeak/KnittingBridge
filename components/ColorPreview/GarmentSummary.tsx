@@ -23,7 +23,7 @@ function RegionRow({ region }: { region: GarmentRegion }) {
       <div className="min-w-0">
         <span className="text-sm font-medium text-foreground">{region.label}</span>
         <span className="text-sm text-muted-foreground">
-          {" "}— {region.originalColorDescription}
+          {": "}{region.originalColorDescription}
         </span>
       </div>
     </div>
@@ -60,7 +60,7 @@ export function GarmentSummary({ analysis }: Props) {
           <ul className="space-y-1">
             {analysis.ambiguities.map((a, i) => (
               <li key={i} className="text-xs text-muted-foreground">
-                — {a}
+                {": "}{a}
               </li>
             ))}
           </ul>

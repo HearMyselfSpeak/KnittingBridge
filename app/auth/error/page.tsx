@@ -6,7 +6,7 @@ import { Suspense } from "react";
 
 const errorMessages: Record<string, string> = {
   Configuration:
-    "There is a problem with the server configuration. Please contact support.",
+    "There is an issue with the server configuration. Please contact support.",
   AccessDenied: "You do not have permission to sign in.",
   Verification:
     "The sign-in link has expired or has already been used. Please request a new one.",

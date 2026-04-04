@@ -19,7 +19,7 @@ export default function Home() {
             <p className="text-lg text-muted-foreground leading-relaxed mb-8 max-w-xl">
               Upload a photo of any knitted or crocheted garment. Describe new
               colors, name a palette theme, or show us your yarn. We&apos;ll
-              generate a preview that changes only the colors — never the
+              generate a preview that changes only the colors, never the
               structure.
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
@@ -109,7 +109,7 @@ export default function Home() {
               href="/get-help"
               className="inline-flex items-center justify-center bg-primary text-primary-foreground text-sm font-medium px-6 py-3 rounded-md hover:opacity-90 transition-opacity"
             >
-              Describe your problem
+              Describe your project
             </Link>
           </div>
         </div>
@@ -149,7 +149,7 @@ export default function Home() {
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   The system matches your request to Guides with the right
-                  skills and temperament. You do not choose — the match is made
+                  skills and temperament. You do not choose. The match is made
                   for you.
                 </p>
               </div>
@@ -163,7 +163,7 @@ export default function Home() {
                   Get your answer
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  A short, scoped session — text, photos, or live video. No
+                  A short, scoped session: text, photos, or live video. No
                   external apps. No upselling. Just the help you came for.
                 </p>
               </div>

@@ -60,7 +60,7 @@ export async function PATCH(
           await resend.emails.send({
             from,
             to,
-            subject: "KnittingBridge Guide Application — Update",
+            subject: "KnittingBridge Guide Application: Update",
             text: `Hi ${profile.user.name ?? "there"},\n\nThank you for applying. After review, we've decided not to move forward at this time. You're welcome to apply again in six months.\n\nKnittingBridge`,
           });
         }

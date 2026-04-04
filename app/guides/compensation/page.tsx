@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Guide Compensation — KnittingBridge",
+  title: "Guide Compensation | KnittingBridge",
   description:
     "How Guide earnings work on KnittingBridge: session rates, the 75/25 split, and payout structure.",
 };
@@ -113,7 +113,7 @@ export default function GuidesCompensation() {
             <div className="w-1.5 h-1.5 rounded-full bg-accent mt-2 shrink-0" />
             <p>
               Payout timing follows Stripe&apos;s standard schedule for your
-              country — typically 2 business days for US accounts. You can
+              country, typically 2 business days for US accounts. You can
               review your payout schedule and history from your Guide dashboard.
             </p>
           </div>
@@ -163,7 +163,7 @@ export default function GuidesCompensation() {
         <p className="text-sm text-muted-foreground leading-relaxed">
           Your Guide dashboard shows your earnings per session, running totals,
           payout history, and Stripe account status. Private feedback from
-          completed sessions is also available there — visible only to you, not
+          completed sessions is also available there, visible only to you, not
           to other Guides or to Makers.
         </p>
       </section>

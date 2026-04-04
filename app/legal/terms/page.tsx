@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — KnittingBridge",
+  title: "Terms of Service | KnittingBridge",
 };
 
 export default function Terms() {
@@ -122,7 +122,7 @@ export default function Terms() {
               "Scraping, crawling, or accessing the Platform by automated means",
             ].map((item) => (
               <li key={item} className="flex gap-2">
-                <span className="text-accent/60 shrink-0">—</span>
+                <span className="text-accent/60 shrink-0">·</span>
                 {item}
               </li>
             ))}

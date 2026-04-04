@@ -22,7 +22,7 @@ export function StepBar({ current }: { current: 1 | 2 | 3 }) {
               {label}
             </span>
             {i < STEPS.length - 1 && (
-              <span className="text-muted-foreground/40 text-xs">—</span>
+              <span className="text-muted-foreground/40 text-xs">·</span>
             )}
           </div>
         );

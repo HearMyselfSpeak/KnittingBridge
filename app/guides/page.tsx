@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Become a Guide — KnittingBridge",
+  title: "Become a Guide | KnittingBridge",
   description:
     "Experienced knitters: get paid for short, scoped sessions helping other knitters get unstuck.",
 };
@@ -59,7 +59,7 @@ export default function GuidesLanding() {
             {[
               {
                 title: "Focused sessions",
-                body: "Each session addresses one specific problem. A Maker submits a request describing their issue. You respond to requests that match your skills. No long-form teaching, no lesson plans.",
+                body: "Each session addresses one specific question. A Maker submits a request describing their issue. You respond to requests that match your skills. No long-form teaching, no lesson plans.",
               },
               {
                 title: "Flexible format",
@@ -100,7 +100,7 @@ export default function GuidesLanding() {
               The distinction matters. An instructor teaches a structured
               curriculum. A Guide is someone who has made enough things, fixed
               enough mistakes, and learned enough from both that they can look
-              at another knitter&apos;s problem and see what is happening.
+              at another knitter&apos;s project and see what is happening.
             </p>
             <p>
               You do not need teaching experience. You need hands-on experience.
@@ -112,7 +112,7 @@ export default function GuidesLanding() {
             <p>
               Guides come from every background. Some are designers. Some are
               shop staff. Some are just the person in their local knitting group
-              who everyone brings their problems to. What they share is depth
+              who everyone brings their questions to. What they share is depth
               of experience in specific areas and an ability to communicate it.
             </p>
           </div>
@@ -212,7 +212,7 @@ export default function GuidesLanding() {
             <p className="text-sm text-primary-foreground/70 leading-relaxed mb-6">
               The application covers your skill areas, experience, and
               communication style. All applications are reviewed by hand.
-              Approval is not automatic — this protects the quality of every
+              Approval is not automatic. This protects the quality of every
               session for Makers and Guides alike.
             </p>
             <div className="flex flex-col sm:flex-row gap-3">

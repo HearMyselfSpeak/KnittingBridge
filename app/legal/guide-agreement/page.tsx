@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import GuideAgreementContent from "./GuideAgreementContent";
 
 export const metadata: Metadata = {
-  title: "Guide Agreement — KnittingBridge",
+  title: "Guide Agreement | KnittingBridge",
 };
 
 export default function GuideAgreement() {
