@@ -1,16 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { getSessionPrice } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 
 const intentSchema = z.object({
   sessionType: z.enum(["15", "45"]),
 });
-
-const PRICES: Record<string, number> = {
-  "15": 3000, // $30
-  "45": 6000, // $60
-};
 
 export async function POST(request: Request) {
   const { auth } = await import("@/lib/auth");
@@ -37,7 +33,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const amountCents = PRICES[result.data.sessionType]!;
+  const amountCents = getSessionPrice(result.data.sessionType);
   const { createPreAuthIntent } = await import("@/lib/stripe");
 
   const intent = await createPreAuthIntent(amountCents, "usd", {

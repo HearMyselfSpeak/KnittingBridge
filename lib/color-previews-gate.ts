@@ -40,11 +40,13 @@ export async function checkRecolorAccess(
     // Still in week 1
     const reset = maybeResetWeek(usage);
     const rem = FREE_RECOLORS - reset.recolorsUsedThisWeek;
+    const projectLimitHit = reset.projectsUsedThisWeek >= FREE_PROJECTS;
     return {
-      allowed: rem > 0,
+      allowed: rem > 0 && !projectLimitHit,
       tier: "anonymous",
-      remaining: Math.max(0, rem),
+      remaining: projectLimitHit ? 0 : Math.max(0, rem),
       daysUntilReset: daysUntil(reset.weekStartedAt),
+      ...(projectLimitHit && { message: "You have reached the project limit for this week. Create an account to continue next week." }),
     };
   }
 
@@ -82,11 +84,13 @@ export async function checkRecolorAccess(
     });
   }
   const rem = FREE_RECOLORS - reset.recolorsUsedThisWeek;
+  const projectLimitHit = reset.projectsUsedThisWeek >= FREE_PROJECTS;
   return {
-    allowed: rem > 0,
+    allowed: rem > 0 && !projectLimitHit,
     tier: "free",
-    remaining: Math.max(0, rem),
+    remaining: projectLimitHit ? 0 : Math.max(0, rem),
     daysUntilReset: daysUntil(reset.weekStartedAt),
+    ...(projectLimitHit && { message: "You have reached the project limit for this week. Your recolors will reset soon." }),
   };
 }
 

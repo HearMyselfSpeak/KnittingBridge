@@ -4,10 +4,10 @@
 
 type DemeritTypeValue = "CANCELLATION" | "NO_SHOW";
 
-const GUIDE_WINDOW_DAYS = 60;
-const GUIDE_THRESHOLD = 3;
-const MAKER_WINDOW_DAYS = 90;
-const MAKER_THRESHOLD = 3;
+export const GUIDE_WINDOW_DAYS = 60;
+export const GUIDE_THRESHOLD = 3;
+export const MAKER_WINDOW_DAYS = 90;
+export const MAKER_THRESHOLD = 3;
 
 interface DemeritSummary {
   totalWeight: number;
@@ -70,6 +70,7 @@ export async function checkThreshold(userId: string): Promise<void> {
   });
 }
 
+// Phase 7: used in admin/maker dashboard
 export async function getDemeritSummary(
   userId: string,
 ): Promise<DemeritSummary> {

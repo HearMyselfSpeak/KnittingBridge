@@ -21,6 +21,7 @@ export async function issueCredit(
   return credit.id;
 }
 
+// Phase 7: used in admin/maker dashboard
 export async function getAvailableCredits(
   makerId: string,
 ): Promise<{ id: string; amountCents: number; expiresAt: Date }[]> {
@@ -37,6 +38,7 @@ export async function getAvailableCredits(
   });
 }
 
+// Phase 7: used in admin/maker dashboard
 export async function applyCredit(
   creditId: string,
   sessionId: string,

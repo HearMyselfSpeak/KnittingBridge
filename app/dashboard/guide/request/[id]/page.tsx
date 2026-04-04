@@ -4,14 +4,9 @@
 import { redirect } from "next/navigation";
 import { requireActivatedGuide } from "@/lib/guide-gate";
 import { getEffectiveFee } from "@/lib/fees";
+import { getSessionPrice, SESSION_LABELS } from "@/lib/pricing";
 import { prisma } from "@/lib/prisma";
 import RequestActions from "./RequestActions";
-
-const PRICES: Record<string, number> = { "15": 3000, "45": 6000 };
-const LABELS: Record<string, string> = {
-  "15": "Quick Look (15 min)",
-  "45": "Deep Dive (45 min)",
-};
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -54,11 +49,11 @@ export default async function GuideRequestPage({ params }: Props) {
   if (!notification) redirect("/dashboard/guide");
 
   const sessionType = request.recommendedSession ?? "15";
-  const grossCents = PRICES[sessionType] ?? 3000;
+  const grossCents = getSessionPrice(sessionType);
   const fee = await getEffectiveFee(guide.id);
   const takeHomeCents = Math.round(grossCents * (1 - fee));
   const takeHome = `$${(takeHomeCents / 100).toFixed(2)}`;
-  const label = LABELS[sessionType] ?? sessionType;
+  const label = SESSION_LABELS[sessionType] ?? sessionType;
 
   return (
     <main className="mx-auto max-w-lg px-4 py-12">

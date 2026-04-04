@@ -3,6 +3,7 @@
 // No AI calls. Pure scheduling math.
 
 import { searchAlternatives } from "@/lib/packing-alternatives";
+import { SESSION_PRICES } from "@/lib/pricing";
 
 export type SessionLength = 15 | 45;
 
@@ -65,7 +66,7 @@ async function getBlockOccupancy(
   let fifteenMinCount = 0;
   let hasFortyFive = false;
   for (const s of sessions) {
-    const dur = s.duration ?? (s.amount >= 6000 ? 45 : 15);
+    const dur = s.duration ?? (s.amount >= SESSION_PRICES["45"] ? 45 : 15);
     if (dur >= 45) hasFortyFive = true;
     else fifteenMinCount++;
   }

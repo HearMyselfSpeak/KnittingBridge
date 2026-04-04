@@ -1,5 +1,7 @@
 "use client";
 
+import { SESSION_PRICES } from "@/lib/pricing";
+
 interface Props {
   sessionType: "15" | "45";
   triageSummary: string;
@@ -7,15 +9,17 @@ interface Props {
   onChangeType: (type: "15" | "45") => void;
 }
 
+const formatPrice = (cents: number) => `$${(cents / 100).toFixed(0)}`;
+
 const PRICES: Record<string, { label: string; price: string; desc: string }> = {
   "15": {
     label: "Quick look",
-    price: "$30",
+    price: formatPrice(SESSION_PRICES["15"]),
     desc: "15 minutes with your Guide. Great for quick questions and stitch checks.",
   },
   "45": {
     label: "Deep dive",
-    price: "$60",
+    price: formatPrice(SESSION_PRICES["45"]),
     desc: "45 minutes with your Guide. For detailed walkthroughs and hands-on help.",
   },
 };

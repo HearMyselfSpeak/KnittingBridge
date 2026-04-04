@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { getSessionPrice } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
       guideProfileId: "", // Placeholder until Guide accepts
       type: "LIVE",
       status: "NOTIFYING_GUIDES",
-      amount: data.sessionType === "45" ? 6000 : 3000,
+      amount: getSessionPrice(data.sessionType),
       duration: parseInt(data.sessionType, 10),
       stripePaymentIntentId: data.paymentIntentId,
     },

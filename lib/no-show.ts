@@ -2,6 +2,9 @@
 // handleGuideNoShow: refund, credit, demerit, pool suspend, cancel.
 // handleMakerNoShow: Guide paid in full, demerit on Maker.
 
+import { GUIDE_THRESHOLD, GUIDE_WINDOW_DAYS } from "@/lib/demerit";
+import { guideNoShowMakerMessage } from "@/lib/cancellation-copy";
+
 interface NoShowResult {
   success: boolean;
   error?: string;
@@ -89,8 +92,8 @@ export async function handleGuideNoShow(
       userId: helpSession.guideProfile.userId,
       role: "GUIDE",
       totalWeight: 2,
-      threshold: 3,
-      windowDays: 60,
+      threshold: GUIDE_THRESHOLD,
+      windowDays: GUIDE_WINDOW_DAYS,
     }).catch((err: unknown) => console.error("[no-show] Admin email failed:", err));
 
     // 7. Pusher notification to Maker
@@ -98,12 +101,7 @@ export async function handleGuideNoShow(
       const { pusher } = await import("@/lib/pusher");
       await pusher.trigger(`session-${sessionId}`, "noshow", {
         party: "guide",
-        message:
-          "We are so sorry. Your Guide was not able to join this session. " +
-          "This is on us to make right, and we are already working on it. " +
-          "You will receive a credit for a free session, and someone from " +
-          "our team will follow up with you personally. Thank you for being " +
-          "here. You are important to us.",
+        message: guideNoShowMakerMessage(),
       });
     } catch (err) {
       console.error("[no-show] Pusher notification failed:", err);

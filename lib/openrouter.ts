@@ -97,7 +97,7 @@ export async function generateImage(opts: ImageGenOptions): Promise<string> {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-image-1.5",
+        model: process.env.OPENROUTER_IMAGE_MODEL ?? "gpt-image-1.5",
         images: [{ image_url: opts.garmentImageUrl }],
         prompt: opts.prompt,
         size: opts.size ?? "auto",
