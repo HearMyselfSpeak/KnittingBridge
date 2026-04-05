@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     const cpCookieId = cookieStore.get("kb_cp_id")?.value;
     if (cpCookieId) {
       const { checkRecolorAccess } = await import("@/lib/color-previews-gate");
-      const access = await checkRecolorAccess(cpCookieId, session?.user?.id);
+      const access = await checkRecolorAccess(cpCookieId, session?.user?.id, sessionId);
       if (!access.allowed) {
         return NextResponse.json(
           { error: "limit_reached", tier: access.tier, remaining: access.remaining, daysUntilReset: access.daysUntilReset },
@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
     let accessInfo = null;
     if (cpCookieId) {
       const { checkRecolorAccess } = await import("@/lib/color-previews-gate");
-      accessInfo = await checkRecolorAccess(cpCookieId, session?.user?.id);
+      accessInfo = await checkRecolorAccess(cpCookieId, session?.user?.id, sessionId);
     }
 
     return NextResponse.json({ previewId: preview.id, imageUrl, access: accessInfo });
