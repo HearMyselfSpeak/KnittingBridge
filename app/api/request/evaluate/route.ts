@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error('Evaluate route error:', err);
     return NextResponse.json(
-      { error: "Evaluation failed. Please try again." },
+      { error: 'Evaluation failed', detail: err instanceof Error ? err.message : String(err) },
       { status: 500 },
     );
   }
