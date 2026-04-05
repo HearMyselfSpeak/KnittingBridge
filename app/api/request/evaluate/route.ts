@@ -8,6 +8,7 @@ const evaluateSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  console.log('TRIAGE_MODEL:', process.env.TRIAGE_MODEL);
   let body: unknown;
   try {
     body = await request.json();
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
     const { evaluateSophistication } = await import("@/lib/ai/triage-v1");
     evaluation = await evaluateSophistication(result.data.input);
   } catch (err) {
-    console.error("[request/evaluate] AI call failed:", err);
+    console.error('Evaluate route error:', err);
     return NextResponse.json(
       { error: "Evaluation failed. Please try again." },
       { status: 500 },
