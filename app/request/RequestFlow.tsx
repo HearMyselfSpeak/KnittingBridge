@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { SessionProvider } from "next-auth/react";
 import ConversationPhase, { type TriageData } from "./ConversationPhase";
 import Step4Account from "./Step4Account";
 import Step5Confirm from "./Step5Confirm";
@@ -113,41 +112,39 @@ export default function RequestFlow() {
     );
   }
 
-  // Steps 4-7 need SessionProvider for auth
+  // Steps 4-7 use session context from root SessionProvider in app/providers.tsx
   return (
-    <SessionProvider>
-      <div className="flex flex-col min-h-[calc(100vh-8rem)]">
-        {debugBar}
-        {step === "account" && (
-          <Step4Account
-            onComplete={handleAccountComplete}
-            callbackUrl="/request?step=confirm"
-            onSaveState={() => {
-              if (triageData) {
-                saveRequestState({ triageData, sessionType });
-              }
-            }}
-          />
-        )}
+    <div className="flex flex-col min-h-[calc(100vh-8rem)]">
+      {debugBar}
+      {step === "account" && (
+        <Step4Account
+          onComplete={handleAccountComplete}
+          callbackUrl="/request?step=confirm"
+          onSaveState={() => {
+            if (triageData) {
+              saveRequestState({ triageData, sessionType });
+            }
+          }}
+        />
+      )}
 
-        {step === "confirm" && triageData && (
-          <Step5Confirm
-            sessionType={sessionType}
-            triageSummary={triageData.triageSummary}
-            onConfirm={handleConfirm}
-            onChangeType={setSessionType}
-          />
-        )}
+      {step === "confirm" && triageData && (
+        <Step5Confirm
+          sessionType={sessionType}
+          triageSummary={triageData.triageSummary}
+          onConfirm={handleConfirm}
+          onChangeType={setSessionType}
+        />
+      )}
 
-        {step === "payment" && (
-          <Step6Payment
-            sessionType={sessionType}
-            onComplete={handlePaymentComplete}
-          />
-        )}
+      {step === "payment" && (
+        <Step6Payment
+          sessionType={sessionType}
+          onComplete={handlePaymentComplete}
+        />
+      )}
 
-        {step === "matching" && <Step7Matching requestId={requestId} />}
-      </div>
-    </SessionProvider>
+      {step === "matching" && <Step7Matching requestId={requestId} />}
+    </div>
   );
 }
