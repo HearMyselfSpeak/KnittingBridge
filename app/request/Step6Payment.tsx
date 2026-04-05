@@ -34,16 +34,23 @@ function PaymentForm({
     setLoading(true);
     setError(null);
 
-    const result = await stripe.confirmPayment({
-      elements,
-      redirect: "if_required",
-    });
+    try {
+      const result = await stripe.confirmPayment({
+        elements,
+        redirect: "if_required",
+      });
 
-    if (result.error) {
-      setError(result.error.message ?? "Payment authorization failed.");
+      if (result.error) {
+        setError(result.error.message ?? "Payment authorization failed.");
+        setLoading(false);
+      } else if (result.paymentIntent) {
+        onComplete(result.paymentIntent.id);
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Unexpected payment error.",
+      );
       setLoading(false);
-    } else if (result.paymentIntent) {
-      onComplete(result.paymentIntent.id);
     }
   }
 
