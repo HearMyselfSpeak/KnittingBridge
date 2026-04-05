@@ -32,87 +32,96 @@ const submitSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const { auth } = await import("@/lib/auth");
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  let body: unknown;
   try {
-    body = await request.json();
-  } catch {
+    const { auth } = await import("@/lib/auth");
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 },
+      );
+    }
+
+    const result = submitSchema.safeParse(body);
+    if (!result.success) {
+      const msg = result.error.issues[0]?.message ?? "Validation failed";
+      return NextResponse.json({ error: msg }, { status: 400 });
+    }
+
+    const data = result.data;
+    const { prisma } = await import("@/lib/prisma");
+    const { stripe } = await import("@/lib/stripe");
+
+    // Create Request record
+    const req = await prisma.request.create({
+      data: {
+        userId: session.user.id,
+        title: data.description.slice(0, 100),
+        description: data.description,
+        imageUrls: data.imageUrls,
+        sophisticationScore: data.sophisticationScore,
+        followUpAnswers: data.followUpAnswers,
+        triageSummary: data.triageSummary,
+        recommendedSession: data.sessionType,
+        matchCriteria: data.matchCriteria,
+        skillsRequired: data.skillTags,
+        status: "SUBMITTED",
+      },
+    });
+
+    // Create HelpSession placeholder (Guide assigned later during matching)
+    const helpSession = await prisma.helpSession.create({
+      data: {
+        requestId: req.id,
+        guideProfileId: "", // Placeholder until Guide accepts
+        type: "LIVE",
+        status: "NOTIFYING_GUIDES",
+        amount: getSessionPrice(data.sessionType),
+        duration: parseInt(data.sessionType, 10),
+        stripePaymentIntentId: data.paymentIntentId,
+      },
+    });
+
+    // Update PI metadata with helpSessionId (webhook depends on it)
+    await stripe.paymentIntents.update(data.paymentIntentId, {
+      metadata: { helpSessionId: helpSession.id },
+    });
+
+    // Run matching + packing + notify Guides (fire and forget)
+    const { notifyMatchedGuides } = await import("@/lib/notify-guides");
+    const sessionLength = data.sessionType === "45" ? 45 : 15;
+
+    const notifyResult = await notifyMatchedGuides({
+      requestId: req.id,
+      matchingInput: {
+        skillTags: [...data.skillTags],
+        matchCriteria: data.matchCriteria,
+        makerEmotionalProfile: data.makerEmotionalProfile,
+        sophisticationScore: data.sophisticationScore,
+        recommendedSession: data.sessionType,
+      },
+      sessionLength: sessionLength as 15 | 45,
+    });
+
+    return NextResponse.json({
+      requestId: req.id,
+      helpSessionId: helpSession.id,
+      notifiedGuides: notifyResult.notifiedCount,
+      hasAlternatives: notifyResult.hasAlternatives,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Invalid request body" },
-      { status: 400 },
+      { error: "submit failed", detail: message },
+      { status: 500 },
     );
   }
-
-  const result = submitSchema.safeParse(body);
-  if (!result.success) {
-    const msg = result.error.issues[0]?.message ?? "Validation failed";
-    return NextResponse.json({ error: msg }, { status: 400 });
-  }
-
-  const data = result.data;
-  const { prisma } = await import("@/lib/prisma");
-  const { stripe } = await import("@/lib/stripe");
-
-  // Create Request record
-  const req = await prisma.request.create({
-    data: {
-      userId: session.user.id,
-      title: data.description.slice(0, 100),
-      description: data.description,
-      imageUrls: data.imageUrls,
-      sophisticationScore: data.sophisticationScore,
-      followUpAnswers: data.followUpAnswers,
-      triageSummary: data.triageSummary,
-      recommendedSession: data.sessionType,
-      matchCriteria: data.matchCriteria,
-      skillsRequired: data.skillTags,
-      status: "SUBMITTED",
-    },
-  });
-
-  // Create HelpSession placeholder (Guide assigned later during matching)
-  const helpSession = await prisma.helpSession.create({
-    data: {
-      requestId: req.id,
-      guideProfileId: "", // Placeholder until Guide accepts
-      type: "LIVE",
-      status: "NOTIFYING_GUIDES",
-      amount: getSessionPrice(data.sessionType),
-      duration: parseInt(data.sessionType, 10),
-      stripePaymentIntentId: data.paymentIntentId,
-    },
-  });
-
-  // Update PI metadata with helpSessionId (webhook depends on it)
-  await stripe.paymentIntents.update(data.paymentIntentId, {
-    metadata: { helpSessionId: helpSession.id },
-  });
-
-  // Run matching + packing + notify Guides (fire and forget)
-  const { notifyMatchedGuides } = await import("@/lib/notify-guides");
-  const sessionLength = data.sessionType === "45" ? 45 : 15;
-
-  const notifyResult = await notifyMatchedGuides({
-    requestId: req.id,
-    matchingInput: {
-      skillTags: [...data.skillTags],
-      matchCriteria: data.matchCriteria,
-      makerEmotionalProfile: data.makerEmotionalProfile,
-      sophisticationScore: data.sophisticationScore,
-      recommendedSession: data.sessionType,
-    },
-    sessionLength: sessionLength as 15 | 45,
-  });
-
-  return NextResponse.json({
-    requestId: req.id,
-    helpSessionId: helpSession.id,
-    notifiedGuides: notifyResult.notifiedCount,
-    hasAlternatives: notifyResult.hasAlternatives,
-  });
 }
