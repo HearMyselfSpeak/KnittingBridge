@@ -79,8 +79,9 @@ export default function ConversationPhase({ onComplete }: Props) {
           body: JSON.stringify({ input: text }),
         });
         if (!res.ok) {
+          const errData = await res.json().catch(() => null);
           setThinking(false);
-          addMessage(ERROR_MESSAGE, "ai");
+          addMessage(errData?.detail || ERROR_MESSAGE, "ai");
           return;
         }
         const data = await res.json();
@@ -125,8 +126,9 @@ export default function ConversationPhase({ onComplete }: Props) {
         body: JSON.stringify({ input, followUpAnswers, sophisticationScore }),
       });
       if (!res.ok) {
+        const errData = await res.json().catch(() => null);
         setThinking(false);
-        addMessage(ERROR_MESSAGE, "ai");
+        addMessage(errData?.detail || ERROR_MESSAGE, "ai");
         return;
       }
       data = await res.json();
