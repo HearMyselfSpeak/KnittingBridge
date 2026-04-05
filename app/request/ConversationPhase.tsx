@@ -81,7 +81,7 @@ export default function ConversationPhase({ onComplete }: Props) {
         if (!res.ok) {
           const errData = await res.json().catch(() => null);
           setThinking(false);
-          addMessage(errData?.detail || ERROR_MESSAGE, "ai");
+          addMessage(errData?.detail || errData?.error || ERROR_MESSAGE, "ai");
           return;
         }
         const data = await res.json();
@@ -128,7 +128,7 @@ export default function ConversationPhase({ onComplete }: Props) {
       if (!res.ok) {
         const errData = await res.json().catch(() => null);
         setThinking(false);
-        addMessage(errData?.detail || ERROR_MESSAGE, "ai");
+        addMessage(errData?.detail || errData?.error || ERROR_MESSAGE, "ai");
         return;
       }
       data = await res.json();
