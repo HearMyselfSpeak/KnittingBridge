@@ -68,9 +68,18 @@ function PaymentForm({
   );
 }
 
+const STRIPE_KEY_PREFIX = (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? '').slice(0, 12);
+
 export default function Step6Payment({ sessionType, onComplete }: Props) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [stripeStatus, setStripeStatus] = useState<string>("pending");
+
+  useEffect(() => {
+    stripePromise
+      .then((s) => setStripeStatus(s ? "resolved" : "resolved-null"))
+      .catch((e) => setStripeStatus(`rejected: ${e}`));
+  }, []);
 
   useEffect(() => {
     async function createIntent() {
@@ -98,7 +107,7 @@ export default function Step6Payment({ sessionType, onComplete }: Props) {
 
   const paymentDebug = (
     <div style={{ background: 'yellow', padding: '4px', fontSize: '12px' }}>
-      clientSecret: {clientSecret ? 'yes' : 'no'} | error: {error || 'none'}
+      clientSecret: {clientSecret ? 'yes' : 'no'} | error: {error || 'none'} | stripeKey: {STRIPE_KEY_PREFIX || 'MISSING'} | stripePromise: {stripeStatus}
     </div>
   );
 
