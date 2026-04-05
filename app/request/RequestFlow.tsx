@@ -97,10 +97,17 @@ export default function RequestFlow() {
     [triageData, sessionType],
   );
 
+  const debugBar = (
+    <div style={{ background: 'yellow', padding: '4px', fontSize: '12px' }}>
+      Step: {step} | HasTriage: {triageData ? 'yes' : 'no'} | SS: {typeof window !== 'undefined' ? (sessionStorage.getItem('kb_request_state') ? 'has data' : 'empty') : 'ssr'}
+    </div>
+  );
+
   // Chat phase runs without SessionProvider (no auth needed for steps 1-3)
   if (step === "chat") {
     return (
       <div className="flex flex-col h-[calc(100vh-4rem)]">
+        {debugBar}
         <ConversationPhase onComplete={handleTriageComplete} />
       </div>
     );
@@ -110,6 +117,7 @@ export default function RequestFlow() {
   return (
     <SessionProvider>
       <div className="flex flex-col min-h-[calc(100vh-8rem)]">
+        {debugBar}
         {step === "account" && (
           <Step4Account
             onComplete={handleAccountComplete}
