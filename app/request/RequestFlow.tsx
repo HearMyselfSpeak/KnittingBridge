@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { SessionProvider } from "next-auth/react";
 import ConversationPhase, { type TriageData } from "./ConversationPhase";
 import Step4Account from "./Step4Account";
@@ -10,11 +10,47 @@ import Step7Matching from "./Step7Matching";
 
 type Step = "chat" | "account" | "confirm" | "payment" | "matching";
 
+const STORAGE_KEY = "kb_request_state";
+
+interface SavedState {
+  triageData: TriageData;
+  sessionType: "15" | "45";
+}
+
+function saveRequestState(state: SavedState) {
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // sessionStorage unavailable (private browsing, etc.)
+  }
+}
+
+function loadRequestState(): SavedState | null {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    sessionStorage.removeItem(STORAGE_KEY);
+    return JSON.parse(raw) as SavedState;
+  } catch {
+    return null;
+  }
+}
+
 export default function RequestFlow() {
   const [step, setStep] = useState<Step>("chat");
   const [triageData, setTriageData] = useState<TriageData | null>(null);
   const [sessionType, setSessionType] = useState<"15" | "45">("45");
   const [requestId, setRequestId] = useState<string | undefined>();
+
+  // Restore state after auth redirect
+  useEffect(() => {
+    const saved = loadRequestState();
+    if (saved?.triageData) {
+      setTriageData(saved.triageData);
+      setSessionType(saved.sessionType);
+      setStep("confirm");
+    }
+  }, []);
 
   const handleTriageComplete = useCallback((data: TriageData) => {
     setTriageData(data);
@@ -78,6 +114,11 @@ export default function RequestFlow() {
           <Step4Account
             onComplete={handleAccountComplete}
             callbackUrl="/request?step=confirm"
+            onSaveState={() => {
+              if (triageData) {
+                saveRequestState({ triageData, sessionType });
+              }
+            }}
           />
         )}
 

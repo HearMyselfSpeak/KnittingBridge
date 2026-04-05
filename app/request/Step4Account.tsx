@@ -6,9 +6,10 @@ import { useEffect, useState } from "react";
 interface Props {
   onComplete: () => void;
   callbackUrl: string;
+  onSaveState?: () => void;
 }
 
-export default function Step4Account({ onComplete, callbackUrl }: Props) {
+export default function Step4Account({ onComplete, callbackUrl, onSaveState }: Props) {
   const { data: session, status } = useSession();
   const [mode, setMode] = useState<"signin" | "signup">("signup");
   const [name, setName] = useState("");
@@ -66,7 +67,7 @@ export default function Step4Account({ onComplete, callbackUrl }: Props) {
       );
       if (mode === "signup") setMode("signin");
     } else if (result?.url) {
-      // Session will update via useSession, triggering onComplete
+      onSaveState?.();
       window.location.href = result.url;
     }
     setLoading(false);
@@ -85,7 +86,10 @@ export default function Step4Account({ onComplete, callbackUrl }: Props) {
       </p>
 
       <button
-        onClick={() => signIn("google", { callbackUrl })}
+        onClick={() => {
+          onSaveState?.();
+          signIn("google", { callbackUrl });
+        }}
         className="w-full flex items-center justify-center gap-3 border border-border rounded-md px-4 py-2.5 text-sm font-medium text-foreground bg-background hover:bg-secondary transition-colors mb-4"
       >
         Continue with Google
