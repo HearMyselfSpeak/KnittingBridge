@@ -25,9 +25,16 @@ export default function Step4Account({ onComplete, callbackUrl, onSaveState }: P
     }
   }, [status, session, onComplete]);
 
+  const authDebug = (
+    <div style={{ background: 'yellow', padding: '4px', fontSize: '12px' }}>
+      Auth status: {status}
+    </div>
+  );
+
   if (status === "loading") {
     return (
       <div className="flex items-center justify-center py-12">
+        {authDebug}
         <p className="text-sm text-muted-foreground">Checking account...</p>
       </div>
     );
@@ -75,6 +82,7 @@ export default function Step4Account({ onComplete, callbackUrl, onSaveState }: P
 
   return (
     <div className="max-w-sm mx-auto py-8 px-4">
+      {authDebug}
       <h2
         className="text-xl font-semibold text-foreground text-center mb-2"
         style={{ fontFamily: "var(--font-serif)" }}
