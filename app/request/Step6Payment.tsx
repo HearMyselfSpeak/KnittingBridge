@@ -71,17 +71,24 @@ export default function Step6Payment({ sessionType, onComplete }: Props) {
 
   useEffect(() => {
     async function createIntent() {
-      const res = await fetch("/api/request/payment-intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionType }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? "Could not set up payment.");
-        return;
+      try {
+        const res = await fetch("/api/request/payment-intent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionType }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => null);
+          setError(data?.error ?? `Payment setup failed (${res.status})`);
+          return;
+        }
+        const data = await res.json();
+        setClientSecret(data.clientSecret);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Network error during payment setup.",
+        );
       }
-      setClientSecret(data.clientSecret);
     }
     createIntent();
   }, [sessionType]);
