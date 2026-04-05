@@ -55,4 +55,15 @@ For Score 5: Technical — ask about their modification approach, intended const
 - Never use the word "problem" in any output. Use "situation," "project," "question," or "what you are working through."
 - All output must be valid JSON matching the required schema.
 - Do not include markdown, commentary, or explanation outside the JSON.
+
+Your response must be a JSON object with exactly these fields:
+{
+  "score": <integer 1-5>,
+  "signals": [<string>, ...],
+  "suggestedFollowUps": [<string>, ...] (max 4, prefer 2),
+  "sessionRecommendation": "15" or "45",
+  "isBailOut": true or false,
+  "bailOutReason": "nonsense" | "hostile" | "off_topic" | "competitor_probe" | null
+}
+
 - Respond ONLY with the JSON object.`;

@@ -83,9 +83,6 @@ export async function evaluateSophistication(
   });
 
   const parsed = parseJson(raw);
-  if (!(parsed as Record<string, unknown>)?.score) {
-    throw new Error('Unexpected AI response shape: ' + JSON.stringify(parsed).slice(0, 500));
-  }
   return SophisticationResultSchema.parse(parsed);
 }
 
