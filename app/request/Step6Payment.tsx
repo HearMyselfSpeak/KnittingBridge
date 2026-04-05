@@ -49,6 +49,9 @@ function PaymentForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div style={{ background: 'yellow', padding: '4px', fontSize: '12px' }}>
+        stripe: {stripe ? 'loaded' : 'not loaded'} | elements: {elements ? 'loaded' : 'not loaded'}
+      </div>
       <PaymentElement />
       {error && <p className="text-xs text-destructive">{error}</p>}
       <button
