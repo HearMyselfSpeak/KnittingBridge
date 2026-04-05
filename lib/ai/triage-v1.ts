@@ -21,6 +21,7 @@ export const SophisticationResultSchema = z.object({
   isBailOut: z.boolean(),
   bailOutReason: z
     .enum(["nonsense", "hostile", "off_topic", "competitor_probe"])
+    .nullable()
     .optional(),
 });
 
