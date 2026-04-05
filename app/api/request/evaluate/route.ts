@@ -23,8 +23,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Input is required" }, { status: 400 });
   }
 
-  const { evaluateSophistication } = await import("@/lib/ai/triage-v1");
-  const evaluation = await evaluateSophistication(result.data.input);
+  let evaluation;
+  try {
+    const { evaluateSophistication } = await import("@/lib/ai/triage-v1");
+    evaluation = await evaluateSophistication(result.data.input);
+  } catch (err) {
+    console.error("[request/evaluate] AI call failed:", err);
+    return NextResponse.json(
+      { error: "Evaluation failed. Please try again." },
+      { status: 500 },
+    );
+  }
 
   // Log bail-out if triggered
   if (evaluation.isBailOut) {

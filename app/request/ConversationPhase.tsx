@@ -61,6 +61,9 @@ export default function ConversationPhase({ onComplete }: Props) {
     [],
   );
 
+  const ERROR_MESSAGE =
+    "Something went wrong on our end. Please try again in a moment.";
+
   async function handleSend(text: string) {
     if (!text.trim() || thinking) return;
     addMessage(text, "maker");
@@ -69,27 +72,37 @@ export default function ConversationPhase({ onComplete }: Props) {
     if (phase === "initial") {
       // Step 1: Evaluate sophistication
       setDescription(text);
-      const res = await fetch("/api/request/evaluate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input: text }),
-      });
-      const data = await res.json();
-      setThinking(false);
+      try {
+        const res = await fetch("/api/request/evaluate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ input: text }),
+        });
+        if (!res.ok) {
+          setThinking(false);
+          addMessage(ERROR_MESSAGE, "ai");
+          return;
+        }
+        const data = await res.json();
+        setThinking(false);
 
-      if (data.isBailOut) {
-        addMessage(BAIL_OUT_MESSAGE, "ai");
-        setPhase("bail");
-        return;
-      }
+        if (data.isBailOut) {
+          addMessage(BAIL_OUT_MESSAGE, "ai");
+          setPhase("bail");
+          return;
+        }
 
-      setScore(data.score);
-      const followUps: string[] = data.suggestedFollowUps ?? [];
-      if (followUps.length > 0) {
-        addMessage(followUps.join("\n\n"), "ai");
-        setPhase("followup");
-      } else {
-        await runTriage(text, [], data.score);
+        setScore(data.score);
+        const followUps: string[] = data.suggestedFollowUps ?? [];
+        if (followUps.length > 0) {
+          addMessage(followUps.join("\n\n"), "ai");
+          setPhase("followup");
+        } else {
+          await runTriage(text, [], data.score);
+        }
+      } catch {
+        setThinking(false);
+        addMessage(ERROR_MESSAGE, "ai");
       }
     } else if (phase === "followup") {
       // Step 2: Maker answered follow-ups, now run triage
@@ -104,12 +117,24 @@ export default function ConversationPhase({ onComplete }: Props) {
     followUpAnswers: string[],
     sophisticationScore: number,
   ) {
-    const res = await fetch("/api/request/triage", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ input, followUpAnswers, sophisticationScore }),
-    });
-    const data = await res.json();
+    let data;
+    try {
+      const res = await fetch("/api/request/triage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ input, followUpAnswers, sophisticationScore }),
+      });
+      if (!res.ok) {
+        setThinking(false);
+        addMessage(ERROR_MESSAGE, "ai");
+        return;
+      }
+      data = await res.json();
+    } catch {
+      setThinking(false);
+      addMessage(ERROR_MESSAGE, "ai");
+      return;
+    }
     setThinking(false);
 
     const result: TriageData = {

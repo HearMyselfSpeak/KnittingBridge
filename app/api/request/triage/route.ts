@@ -28,12 +28,21 @@ export async function POST(request: Request) {
     );
   }
 
-  const { generateTriageResult } = await import("@/lib/ai/triage-v1");
-  const triage = await generateTriageResult(
-    result.data.input,
-    result.data.followUpAnswers,
-    result.data.sophisticationScore,
-  );
+  let triage;
+  try {
+    const { generateTriageResult } = await import("@/lib/ai/triage-v1");
+    triage = await generateTriageResult(
+      result.data.input,
+      result.data.followUpAnswers,
+      result.data.sophisticationScore,
+    );
+  } catch (err) {
+    console.error("[request/triage] AI call failed:", err);
+    return NextResponse.json(
+      { error: "Triage failed. Please try again." },
+      { status: 500 },
+    );
+  }
 
   return NextResponse.json(triage);
 }
