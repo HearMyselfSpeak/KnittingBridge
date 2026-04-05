@@ -93,9 +93,16 @@ export default function Step6Payment({ sessionType, onComplete }: Props) {
     createIntent();
   }, [sessionType]);
 
+  const paymentDebug = (
+    <div style={{ background: 'yellow', padding: '4px', fontSize: '12px' }}>
+      clientSecret: {clientSecret ? 'yes' : 'no'} | error: {error || 'none'}
+    </div>
+  );
+
   if (error) {
     return (
       <div className="max-w-md mx-auto py-8 px-4 text-center">
+        {paymentDebug}
         <p className="text-sm text-destructive">{error}</p>
       </div>
     );
@@ -104,6 +111,7 @@ export default function Step6Payment({ sessionType, onComplete }: Props) {
   if (!clientSecret) {
     return (
       <div className="max-w-md mx-auto py-8 px-4 text-center">
+        {paymentDebug}
         <p className="text-sm text-muted-foreground">
           Setting up payment...
         </p>
@@ -113,6 +121,7 @@ export default function Step6Payment({ sessionType, onComplete }: Props) {
 
   return (
     <div className="max-w-md mx-auto py-8 px-4">
+      {paymentDebug}
       <h2
         className="text-xl font-semibold text-foreground text-center mb-2"
         style={{ fontFamily: "var(--font-serif)" }}
