@@ -42,7 +42,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/get-help"
+                  href="/request"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Get help

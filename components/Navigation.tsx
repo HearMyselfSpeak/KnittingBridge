@@ -48,7 +48,7 @@ export default async function Navigation() {
           {user && role === "MAKER" && (
             <>
               <Link
-                href="/get-help"
+                href="/request"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Get help

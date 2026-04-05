@@ -89,7 +89,7 @@ export function NavigationMobileMenu({ session }: Props) {
             {user && role === "MAKER" && (
               <>
                 <Link
-                  href="/get-help"
+                  href="/request"
                   onClick={() => setOpen(false)}
                   className="text-sm text-foreground hover:text-primary transition-colors"
                 >

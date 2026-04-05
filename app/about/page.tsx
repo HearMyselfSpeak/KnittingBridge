@@ -148,7 +148,7 @@ export default function About() {
 
       <div className="mt-14 flex flex-col sm:flex-row gap-3">
         <Link
-          href="/get-help"
+          href="/request"
           className="inline-flex items-center justify-center bg-primary text-primary-foreground text-sm font-medium px-6 py-3 rounded-md hover:opacity-90 transition-opacity"
         >
           Get help now

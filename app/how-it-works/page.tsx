@@ -156,7 +156,7 @@ export default function HowItWorks() {
 
         <div className="mt-8">
           <Link
-            href="/get-help"
+            href="/request"
             className="inline-flex items-center justify-center bg-primary text-primary-foreground text-sm font-medium px-6 py-3 rounded-md hover:opacity-90 transition-opacity"
           >
             Describe your project
