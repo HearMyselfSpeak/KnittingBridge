@@ -80,7 +80,6 @@ export async function POST(request: Request) {
     const helpSession = await prisma.helpSession.create({
       data: {
         requestId: req.id,
-        guideProfileId: "", // Placeholder until Guide accepts
         type: "LIVE",
         status: "NOTIFYING_GUIDES",
         amount: getSessionPrice(data.sessionType),
